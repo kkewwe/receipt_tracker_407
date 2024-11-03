@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Restaurant {
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  name     String
+  address  String
+  email    String  @unique
+  password String
+  dishes   Dish[]  @relation("RestaurantToDishes")
+  orders   Order[] @relation("RestaurantToOrders")
+}
+
+model Dish {
+  id           String      @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  cost         Float
+  restaurantId String      @db.ObjectId
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id], name: "RestaurantToDishes")
+  orders       OrderDish[]
+}
+
+model Order {
+  id           String      @id @default(auto()) @map("_id") @db.ObjectId
+  clientId     String      @db.ObjectId
+  restaurantId String      @db.ObjectId
+  orderDate    DateTime
+  total        Float
+  dishes       OrderDish[]
+  client       Client      @relation(fields: [clientId], references: [id], name: "OrderToClient")
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id], name: "RestaurantToOrders")
+}
+
+model Client {
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  email    String  @unique
+  password String
+  orders   Order[] @relation("OrderToClient")
+}
+
+// Intermediate table for many-to-many relationship between Order and Dish
+model OrderDish {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  orderId String @db.ObjectId
+  dishId  String @db.ObjectId
+  order   Order  @relation(fields: [orderId], references: [id])
+  dish    Dish   @relation(fields: [dishId], references: [id])
+
+  @@unique([orderId, dishId]) // Create a unique index to ensure unique pairs
+}
