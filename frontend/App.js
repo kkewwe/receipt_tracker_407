@@ -1,6 +1,8 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import RegisterScreen from './src/screens/RegisterScreen';//register screen imported
+import LoginScreen from './src/screens/LoginScreen';//login screen imported
 
 const Stack = createStackNavigator();
 
@@ -24,21 +26,21 @@ function HomeScreen({ navigation }) {
   );
 }
 
-function LoginScreen() {
-  return (
-    <View style={styles.container}>
-      <Text>Login Screen</Text>
-    </View>
-  );
-}
-
-function RegisterScreen() {
-  return (
-    <View style={styles.container}>
-      <Text>Register Screen</Text>
-    </View>
-  );
-}
+//// function LoginScreen() {
+//   return (
+//     <View style={styles.container}>
+//       <Text>Login Screen</Text>
+//     </View>
+//   );
+// }
+// //imported register screen above
+// function RegisterScreen() {
+//   return (
+//     <View style={styles.container}>
+//       <Text>Register Screen</Text>
+//     </View>
+//   );
+// }
 
 export default function App() {
   return (
