@@ -1,6 +1,6 @@
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, useAnimatedValue, Animated} from 'react-native';
 
-export default function HomeScreen({ navigation }) {
+export default function HomeScreen({navigation }) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Centsible Scans</Text>
