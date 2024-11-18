@@ -1,9 +1,25 @@
-import { StyleSheet, Text, View, TouchableOpacity, useAnimatedValue, Animated} from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Animated, useAnimatedValue, Image, Button, SafeAreaView} from 'react-native';
+import AppLogo from "../../assets/bill.png"
 
-export default function HomeScreen({navigation }) {
+export default function HomeScreen({ navigation }) {
+  const fadeAnim = useAnimatedValue(0);
+
+  const fadeIn = () => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 5000,
+      useNativeDriver: true,
+    }).start();
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Centsible Scans</Text>
+      <Animated.View
+        style={styles.appTitle}
+      >
+        <Image style={styles.logo} source={AppLogo} />
+        <Text style={styles.title}>Centsible Scans</Text>
+      </Animated.View>
       <TouchableOpacity 
         style={styles.button} 
         onPress={() => navigation.navigate('Login')}
@@ -31,7 +47,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 40,
+  },
+  appTitle:{
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 30
   },
   button: {
     backgroundColor: '#000',
@@ -46,4 +66,8 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
   },
+  logo: {
+    width: 70,
+    height: 70,
+  }
 });
