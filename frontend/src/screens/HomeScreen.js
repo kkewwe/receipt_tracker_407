@@ -1,25 +1,55 @@
-import { StyleSheet, Text, View, TouchableOpacity, Animated, useAnimatedValue, Image, Button, SafeAreaView} from 'react-native';
-import AppLogo from "../../assets/bill.png"
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, Animated, Image } from 'react-native';
+import AppLogo from "../../assets/bill.png";
 
 export default function HomeScreen({ navigation }) {
-  const fadeAnim = useAnimatedValue(0);
+  const [isUserSide, setIsUserSide] = useState(true); // Toggle state
 
-  const fadeIn = () => {
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 5000,
-      useNativeDriver: true,
-    }).start();
-  };
+  const toggleSide = () => setIsUserSide(previousState => !previousState);
 
   return (
     <View style={styles.container}>
-      <Animated.View
-        style={styles.appTitle}
-      >
+      <Animated.View style={styles.appTitle}>
         <Image style={styles.logo} source={AppLogo} />
         <Text style={styles.title}>Centsible Scans</Text>
       </Animated.View>
+      
+      
+      <View style={styles.toggleContainer}>
+        <TouchableOpacity
+          style={[
+            styles.toggleButton,
+            isUserSide && styles.activeToggleButton,
+          ]}
+          onPress={() => !isUserSide && toggleSide()}
+        >
+          <Text
+            style={[
+              styles.toggleText,
+              isUserSide && styles.activeToggleText,
+            ]}
+          >
+            User Side
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.toggleButton,
+            !isUserSide && styles.activeToggleButton,
+          ]}
+          onPress={() => isUserSide && toggleSide()}
+        >
+          <Text
+            style={[
+              styles.toggleText,
+              !isUserSide && styles.activeToggleText,
+            ]}
+          >
+            Restaurant Side
+          </Text>
+        </TouchableOpacity>
+      </View>
+
       <TouchableOpacity 
         style={styles.button} 
         onPress={() => navigation.navigate('Login')}
@@ -48,10 +78,36 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
   },
-  appTitle:{
+  appTitle: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 30
+    marginBottom: 30,
+  },
+  toggleContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  toggleButton: {
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    flex: 1,
+    alignItems: 'center',
+    marginHorizontal: 5,
+    borderRadius: 5,
+    backgroundColor: '#f5f5f5',
+  },
+  activeToggleButton: {
+    backgroundColor: '#000',
+  },
+  toggleText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  activeToggleText: {
+    color: '#fff',
   },
   button: {
     backgroundColor: '#000',
@@ -69,5 +125,5 @@ const styles = StyleSheet.create({
   logo: {
     width: 70,
     height: 70,
-  }
+  },
 });
