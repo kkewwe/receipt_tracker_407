@@ -2,21 +2,32 @@ import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-nativ
 import React, { useState } from 'react';
 
 export default function RegisterScreen({ navigation }) {
+  const [username, setUsername] = useState(''); // Added username state
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
   const handleRegister = () => {
-    
-    console.log('Registering user with email:', email);
-    console.log('password', password);
-    console.log('confirming password',setConfirmPassword);
+    console.log('Registering user with username:', username);
+    console.log('Email:', email);
+    console.log('Password:', password);
+    console.log('Confirm Password:', confirmPassword);
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}> User Sign Up</Text>
-      
+      <Text style={styles.title}>User Sign Up</Text>
+
+      <Text style={styles.label}>Username:</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Enter Username"
+        value={username}
+        onChangeText={setUsername}
+        autoCapitalize="none"
+      />
+
+      <Text style={styles.label}>Email:</Text>
       <TextInput
         style={styles.input}
         placeholder="Enter Email"
@@ -25,16 +36,18 @@ export default function RegisterScreen({ navigation }) {
         keyboardType="email-address"
         autoCapitalize="none"
       />
-      
+
+      <Text style={styles.label}>Password:</Text>
       <TextInput
         style={styles.input}
-        placeholder="Password"
+        placeholder="Enter Password"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
         autoCapitalize="none"
       />
-      
+
+      <Text style={styles.label}>Confirm Password:</Text>
       <TextInput
         style={styles.input}
         placeholder="Confirm Password"
@@ -43,14 +56,11 @@ export default function RegisterScreen({ navigation }) {
         secureTextEntry
         autoCapitalize="none"
       />
-      
-      <TouchableOpacity 
-        style={styles.button} 
-        onPress={handleRegister}
-      >
+
+      <TouchableOpacity style={styles.button} onPress={handleRegister}>
         <Text style={styles.buttonText}>Sign Up</Text>
       </TouchableOpacity>
-      
+
       <TouchableOpacity onPress={() => navigation.navigate('Login')}>
         <Text style={styles.loginText}>Already a user? Log in instead</Text>
       </TouchableOpacity>
@@ -70,6 +80,13 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 40,
+  },
+  label: {
+    width: '100%',
+    maxWidth: 300,
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 5,
   },
   input: {
     width: '100%',
