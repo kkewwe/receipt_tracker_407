@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Animated, Image } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native';
 import AppLogo from "../../assets/bill.png";
 
 export default function HomeScreen({ navigation }) {
@@ -9,12 +9,12 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Animated.View style={styles.appTitle}>
+      <View style={styles.appTitle}>
         <Image style={styles.logo} source={AppLogo} />
         <Text style={styles.title}>Centsible Scans</Text>
-      </Animated.View>
+      </View>
       
-      
+      {/* Custom Toggle */}
       <View style={styles.toggleContainer}>
         <TouchableOpacity
           style={[
@@ -52,13 +52,13 @@ export default function HomeScreen({ navigation }) {
 
       <TouchableOpacity 
         style={styles.button} 
-        onPress={() => navigation.navigate('Login')}
+        onPress={() => navigation.navigate('Login', { isUserSide })}
       >
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
       <TouchableOpacity 
         style={styles.button}
-        onPress={() => navigation.navigate('Register')}
+        onPress={() => navigation.navigate('Register', { isUserSide })}
       >
         <Text style={styles.buttonText}>Register</Text>
       </TouchableOpacity>

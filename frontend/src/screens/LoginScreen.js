@@ -1,19 +1,21 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
 
-export default function LoginScreen({ navigation }) {
+export default function LoginScreen({ navigation, route }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
-  const handleSignIn = () => {
   
+  const { isUserSide } = route.params; // Get toggle state
+  
+  const handleSignIn = () => {
+    console.log(isUserSide ? 'User Login' : 'Restaurant Login');
     console.log('Email:', email);
     console.log('Password:', password);
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>User Login</Text>
+      <Text style={styles.title}>{isUserSide ? 'User Login' : 'Restaurant Login'}</Text>
       
       <TextInput
         style={styles.input}
@@ -42,8 +44,10 @@ export default function LoginScreen({ navigation }) {
         <Text style={styles.buttonText}>Sign In</Text>
       </TouchableOpacity>
       
-      <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-        <Text style={styles.registerText}>Not registered? Register</Text>
+      <TouchableOpacity onPress={() => navigation.navigate('Register', { isUserSide })}>
+        <Text style={styles.registerText}>
+          {isUserSide ? 'Not registered? Register as User' : 'Not registered? Register as Restaurant'}
+        </Text>
       </TouchableOpacity>
     </View>
   );
