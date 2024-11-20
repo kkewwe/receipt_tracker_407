@@ -5,12 +5,17 @@ export default function LoginScreen({ navigation, route }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   
-  const { isUserSide } = route.params; // Get toggle state
+  const { isUserSide } = route.params; 
   
   const handleSignIn = () => {
     console.log(isUserSide ? 'User Login' : 'Restaurant Login');
     console.log('Email:', email);
     console.log('Password:', password);
+    
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'MainApp' }],
+    });
   };
 
   return (
