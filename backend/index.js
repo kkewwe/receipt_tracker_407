@@ -6,10 +6,10 @@ const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const bodyParser = require('body-parser');
 
-const Order = require('./models/Order');
-const Client = require('./models/Client');
-const Dish = require('./models/Dish');
-const Restaurant = require('./models/Restaurant');
+const Order = require('./models/order');
+const Client = require('./models/client');
+const Dish = require('./models/dish');
+const Restaurant = require('./models/restaurant');
 
 const app = express();
 app.use(bodyParser.json());
