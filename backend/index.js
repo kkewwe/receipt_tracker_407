@@ -5,19 +5,22 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const bodyParser = require('body-parser');
+const cors = require('cors');
+
+const app = express();  
+
+app.use(cors());
+app.use(bodyParser.json());
 
 const Order = require('./models/order');
 const Client = require('./models/client');
 const Dish = require('./models/dish');
 const Restaurant = require('./models/restaurant');
 
-const app = express();
-app.use(bodyParser.json());
-
 const JWT_SECRET = 'your_jwt_secret_key';
 
 // MongoDB Connection
-mongoose.connect('mongodb://localhost:27017/receiptApp', {
+mongoose.connect('mongodb+srv://alyu3:n3FJcN9oD88WdqcZ@cluster0.he2r7.mongodb.net/?retryWrites=true&w=majority', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
