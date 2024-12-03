@@ -1,21 +1,56 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const API_URL = 'http://localhost:5000'; // Change to your server IP when testing on physical device
 
 export default function LoginScreen({ navigation, route }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   
-  const { isUserSide } = route.params; 
+  const { isUserSide } = route.params;
   
-  const handleSignIn = () => {
-    console.log(isUserSide ? 'User Login' : 'Restaurant Login');
-    console.log('Email:', email);
-    console.log('Password:', password);
-    
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'MainApp' }],
-    });
+  const handleSignIn = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const endpoint = isUserSide ? '/login-user' : '/login-restaurant';
+      const response = await fetch(API_URL + endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        // Store the token
+        await AsyncStorage.setItem('userToken', data.token);
+        await AsyncStorage.setItem('userType', isUserSide ? 'user' : 'restaurant');
+        
+        // Navigate to main app
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'MainApp' }],
+        });
+      } else {
+        Alert.alert('Error', data.error || 'Login failed');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -30,6 +65,7 @@ export default function LoginScreen({ navigation, route }) {
         keyboardType="email-address"
         autoCapitalize="none"
         autoCorrect={false}
+        editable={!loading}
       />
       
       <TextInput
@@ -40,16 +76,23 @@ export default function LoginScreen({ navigation, route }) {
         secureTextEntry
         autoCapitalize="none"
         autoCorrect={false}
+        editable={!loading}
       />
       
       <TouchableOpacity 
-        style={styles.button} 
+        style={[styles.button, loading && styles.buttonDisabled]} 
         onPress={handleSignIn}
+        disabled={loading}
       >
-        <Text style={styles.buttonText}>Sign In</Text>
+        <Text style={styles.buttonText}>
+          {loading ? 'Signing In...' : 'Sign In'}
+        </Text>
       </TouchableOpacity>
       
-      <TouchableOpacity onPress={() => navigation.navigate('Register', { isUserSide })}>
+      <TouchableOpacity 
+        onPress={() => navigation.navigate('Register', { isUserSide })}
+        disabled={loading}
+      >
         <Text style={styles.registerText}>
           {isUserSide ? 'Not registered? Register as User' : 'Not registered? Register as Restaurant'}
         </Text>

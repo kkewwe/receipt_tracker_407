@@ -1,20 +1,61 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
+
+const API_URL = 'http://localhost:5000';
 
 export default function RegisterScreen({ navigation, route }) {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   
-  const { isUserSide } = route.params; 
+  const { isUserSide } = route.params;
 
-  const handleRegister = () => {
-    console.log(isUserSide ? 'Registering User' : 'Registering Restaurant');
-    console.log('Username:', username);
-    console.log('Email:', email);
-    console.log('Password:', password);
-    console.log('Confirm Password:', confirmPassword);
+  const handleRegister = async () => {
+    if (!email || !password || !confirmPassword || (!isUserSide && !username)) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const endpoint = isUserSide ? '/register-user' : '/register-restaurant';
+      const response = await fetch(API_URL + endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          ...(isUserSide ? {} : { name: username, address: 'Default Address' }),
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        Alert.alert('Success', 'Registration successful', [
+          {
+            text: 'OK',
+            onPress: () => navigation.navigate('Login', { isUserSide })
+          }
+        ]);
+      } else {
+        Alert.alert('Error', data.error || 'Registration failed');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Network error. Please try again.');
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
