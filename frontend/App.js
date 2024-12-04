@@ -1,14 +1,16 @@
+import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import ScannerScreen from './src/screens/ScannerScreen';
 import { StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import RegisterScreen from './src/screens/RegisterScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import ClientDashboard from './src/screens/ClientDashboard';
 import SettingsScreen from './src/screens/SettingsScreen';
-import { Ionicons } from '@expo/vector-icons'; 
+import QRCodeScannerScreen from './src/screens/QRCodeScannerScreen'; 
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -26,6 +28,8 @@ function TabNavigator() {
             iconName = focused ? 'scan' : 'scan-outline';
           } else if (route.name === 'Settings') {
             iconName = focused ? 'settings' : 'settings-outline';
+          } else if (route.name === 'QR Scan') {
+            iconName = focused ? 'qr-code' : 'qr-code-outline'; 
           }
 
           return <Ionicons name={iconName} size={size} color={color} />;
@@ -35,7 +39,7 @@ function TabNavigator() {
       })}
     >
       <Tab.Screen name="Dashboard" component={ClientDashboard} />
-      <Tab.Screen name="Scanner" component={ScannerScreen} />
+      <Tab.Screen name="QR Scan" component={QRCodeScannerScreen} /> 
       <Tab.Screen name="Settings" component={SettingsScreen} />
     </Tab.Navigator>
   );
