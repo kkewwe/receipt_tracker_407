@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
 
-const API_URL = 'http://10.140.149.173:5000'; // Use your local network IP
-
+const API_URL = 'http://10.140.149.173:5000'; 
 
 export default function RegisterScreen({ navigation, route }) {
   const [username, setUsername] = useState('');
@@ -14,7 +13,8 @@ export default function RegisterScreen({ navigation, route }) {
   const { isUserSide } = route.params;
 
   const handleRegister = async () => {
-    if (!email || !password || !confirmPassword || !username) {  // username is required for both
+    console.log('Registration started');
+    if (!email || !password || !confirmPassword || !username) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
@@ -26,7 +26,16 @@ export default function RegisterScreen({ navigation, route }) {
   
     setLoading(true);
     try {
-      const endpoint = isUserSide ? '/api/auth/register' : '/api/auth/register';  // same endpoint, differentiated by userType
+      const endpoint = isUserSide ? '/api/auth/register' : '/api/auth/register';
+      console.log('Making request to:', API_URL + endpoint); 
+      console.log('With body:', {  
+        email,
+        password,
+        name: username,
+        userType: isUserSide ? 'client' : 'restaurant',
+        ...(isUserSide ? {} : { address: 'Default Address' }),
+      });
+      
       const response = await fetch(API_URL + endpoint, {
         method: 'POST',
         headers: {
@@ -35,24 +44,21 @@ export default function RegisterScreen({ navigation, route }) {
         body: JSON.stringify({
           email,
           password,
-          name: username,  // sending name
-          userType: isUserSide ? 'client' : 'restaurant',  // sending userType
+          name: username,
+          userType: isUserSide ? 'client' : 'restaurant',
           ...(isUserSide ? {} : { address: 'Default Address' }),
         }),
       });
   
+      console.log('Response status:', response.status);
       const data = await response.json();
+      console.log('Response data:', data);  
         
       if (response.ok) {
-        Alert.alert('Success', 'Registration successful', [
-          {
-            text: 'OK',
-            onPress: () => navigation.navigate('Login', { isUserSide })
-          }
-        ]);
+        alert('Registration successful');
+        navigation.navigate('Login', { isUserSide });
       } else {
-        console.log('Error response:', data);  // Log the error response for debugging
-        Alert.alert('Error', data.error || 'Registration failed');
+        alert(data.error || 'Registration failed');
       }
     } catch (error) {
       Alert.alert('Error', 'Network error. Please try again.');
