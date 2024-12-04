@@ -10,7 +10,6 @@ npm install --> node index.js
 Start the frontend: 
 ```
 cd frontend
-npm run dev
 npm install --> npm start 
 ```
 
