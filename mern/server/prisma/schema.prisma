@@ -23,6 +23,8 @@ model Restaurant {
   orders   Order[] @relation("RestaurantToOrders")
 }
 
+
+
 model Dish {
   id           String      @id @default(auto()) @map("_id") @db.ObjectId
   name         String
