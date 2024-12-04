@@ -1,6 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import ScannerScreen from './src/screens/ScannerScreen';
 import { StyleSheet } from 'react-native';
 import RegisterScreen from './src/screens/RegisterScreen';
 import LoginScreen from './src/screens/LoginScreen';
@@ -21,6 +22,8 @@ function TabNavigator() {
 
           if (route.name === 'Dashboard') {
             iconName = focused ? 'home' : 'home-outline';
+          } else if (route.name === 'Scanner') {
+            iconName = focused ? 'scan' : 'scan-outline';
           } else if (route.name === 'Settings') {
             iconName = focused ? 'settings' : 'settings-outline';
           }
@@ -32,6 +35,7 @@ function TabNavigator() {
       })}
     >
       <Tab.Screen name="Dashboard" component={ClientDashboard} />
+      <Tab.Screen name="Scanner" component={ScannerScreen} />
       <Tab.Screen name="Settings" component={SettingsScreen} />
     </Tab.Navigator>
   );
