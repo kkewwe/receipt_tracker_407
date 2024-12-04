@@ -1,146 +1,115 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const QRCode = require('qrcode');
+require('dotenv').config();
+
+const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
-const bodyParser = require('body-parser');
-const cors = require('cors');
 
-const app = express();  
+const app = express();
 
+// Middleware
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
-const Order = require('./models/order');
 const Client = require('./models/client');
-const Dish = require('./models/dish');
 const Restaurant = require('./models/restaurant');
 
 const JWT_SECRET = 'your_jwt_secret_key';
 
 // MongoDB Connection
-mongoose.connect('mongodb+srv://alyu3:n3FJcN9oD88WdqcZ@cluster0.he2r7.mongodb.net/?retryWrites=true&w=majority', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
 
-/**
- * Middleware to authenticate using JWT
- */
-const authenticateToken = (req, res, next) => {
-  const token = req.header('Authorization');
-  if (!token) return res.status(401).json({ error: 'Access denied. No token provided.' });
-
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded;
-    next();
-  } catch (err) {
-    res.status(400).json({ error: 'Invalid token.' });
-  }
-};
-
-// Helper function to generate JWT
-const generateToken = (id, role) => {
-  return jwt.sign({ id, role }, JWT_SECRET, { expiresIn: '1h' });
-};
-
-// ==================== REGISTRATION ====================
-
-// Register a new user
-app.post('/register-user', [
+// Registration route
+app.post('/api/auth/register', [
   body('email').isEmail(),
-  body('password').isLength({ min: 6 })
+  body('password').isLength({ min: 6 }),
+  body('userType').isIn(['client', 'restaurant'])
 ], async (req, res) => {
-  const { email, password } = req.body;
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-
   try {
-    const existingUser = await Client.findOne({ email });
-    if (existingUser) return res.status(400).json({ error: 'User already exists' });
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new Client({ email, password: hashedPassword });
+    const { email, password, userType, name } = req.body;
+    const Model = userType === 'client' ? Client : Restaurant;
+    
+    const existingUser = await Model.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 12);
+    const newUser = new Model({
+      email,
+      password: hashedPassword,
+      name,
+      ...(userType === 'restaurant' && { address: req.body.address })
+    });
+
     await newUser.save();
 
-    const token = generateToken(newUser._id, 'user');
-    res.json({ token });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    const token = jwt.sign(
+      { userId: newUser._id, userType },
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    res.status(201).json({
+      message: 'Registration successful',
+      token,
+      userId: newUser._id,
+      userType
+    });
+
+  } catch (error) {
+    console.error('Registration error:', error);
+    res.status(500).json({ message: 'Registration failed', error: error.message });
   }
 });
 
-// Register a new restaurant
-app.post('/register-restaurant', [
-  body('email').isEmail(),
-  body('password').isLength({ min: 6 })
-], async (req, res) => {
-  const { name, address, email, password } = req.body;
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-
+// Login route
+app.post('/api/auth/login', async (req, res) => {
   try {
-    const existingRestaurant = await Restaurant.findOne({ email });
-    if (existingRestaurant) return res.status(400).json({ error: 'Restaurant already exists' });
+    const { email, password, userType } = req.body;
+    
+    if (!email || !password || !userType) {
+      return res.status(400).json({ message: 'Please provide all required fields' });
+    }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newRestaurant = new Restaurant({ name, address, email, password: hashedPassword });
-    await newRestaurant.save();
+    const Model = userType === 'client' ? Client : Restaurant;
+    
+    const user = await Model.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ message: 'Authentication failed' });
+    }
 
-    const token = generateToken(newRestaurant._id, 'restaurant');
-    res.json({ token });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
+      return res.status(401).json({ message: 'Authentication failed' });
+    }
+
+    const token = jwt.sign(
+      { userId: user._id, userType },
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    res.json({
+      message: 'Login successful',
+      token,
+      userId: user._id,
+      userType
+    });
+
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ message: 'Login failed', error: error.message });
   }
-});
-
-// ==================== LOGIN ====================
-
-// User login
-app.post('/login-user', async (req, res) => {
-  const { email, password } = req.body;
-
-  try {
-    const user = await Client.findOne({ email });
-    if (!user) return res.status(400).json({ error: 'User not found' });
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ error: 'Invalid password' });
-
-    const token = generateToken(user._id, 'user');
-    res.json({ token });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Restaurant login
-app.post('/login-restaurant', async (req, res) => {
-  const { email, password } = req.body;
-
-  try {
-    const restaurant = await Restaurant.findOne({ email });
-    if (!restaurant) return res.status(400).json({ error: 'Restaurant not found' });
-
-    const isMatch = await bcrypt.compare(password, restaurant.password);
-    if (!isMatch) return res.status(400).json({ error: 'Invalid password' });
-
-    const token = generateToken(restaurant._id, 'restaurant');
-    res.json({ token });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// ==================== PROTECTED ROUTES ====================
-
-// Example of a protected route
-app.get('/dashboard', authenticateToken, async (req, res) => {
-  res.json({ message: `Welcome ${req.user.role}` });
 });
 
 const PORT = 5000;

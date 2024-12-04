@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema({
   orderID: { type: String, unique: true },
-  clientID: String,
+  name: String,
   restaurantID: String,
   orderDate: Date,
   total: Number,

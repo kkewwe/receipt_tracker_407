@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
 
-const API_URL = 'http://localhost:5000';
+const API_URL = 'http://10.140.149.173:5000'; // Use your local network IP
+
 
 export default function RegisterScreen({ navigation, route }) {
   const [username, setUsername] = useState('');
@@ -13,19 +14,19 @@ export default function RegisterScreen({ navigation, route }) {
   const { isUserSide } = route.params;
 
   const handleRegister = async () => {
-    if (!email || !password || !confirmPassword || (!isUserSide && !username)) {
+    if (!email || !password || !confirmPassword || !username) {  // username is required for both
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
-
+  
     if (password !== confirmPassword) {
       Alert.alert('Error', 'Passwords do not match');
       return;
     }
-
+  
     setLoading(true);
     try {
-      const endpoint = isUserSide ? '/register-user' : '/register-restaurant';
+      const endpoint = isUserSide ? '/api/auth/register' : '/api/auth/register';  // same endpoint, differentiated by userType
       const response = await fetch(API_URL + endpoint, {
         method: 'POST',
         headers: {
@@ -34,12 +35,14 @@ export default function RegisterScreen({ navigation, route }) {
         body: JSON.stringify({
           email,
           password,
-          ...(isUserSide ? {} : { name: username, address: 'Default Address' }),
+          name: username,  // sending name
+          userType: isUserSide ? 'client' : 'restaurant',  // sending userType
+          ...(isUserSide ? {} : { address: 'Default Address' }),
         }),
       });
-
+  
       const data = await response.json();
-      
+        
       if (response.ok) {
         Alert.alert('Success', 'Registration successful', [
           {
@@ -48,6 +51,7 @@ export default function RegisterScreen({ navigation, route }) {
           }
         ]);
       } else {
+        console.log('Error response:', data);  // Log the error response for debugging
         Alert.alert('Error', data.error || 'Registration failed');
       }
     } catch (error) {

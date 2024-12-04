@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_URL = 'http://localhost:5000'; // Change to your server IP when testing on physical device
+const API_URL = 'http://10.140.149.173:5000'; // Change to your server IP when testing on physical device
 
 export default function LoginScreen({ navigation, route }) {
   const [email, setEmail] = useState('');
@@ -19,8 +19,7 @@ export default function LoginScreen({ navigation, route }) {
 
     setLoading(true);
     try {
-      const endpoint = isUserSide ? '/login-user' : '/login-restaurant';
-      const response = await fetch(API_URL + endpoint, {
+      const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -28,30 +27,31 @@ export default function LoginScreen({ navigation, route }) {
         body: JSON.stringify({
           email,
           password,
+          userType: isUserSide ? 'client' : 'restaurant' 
         }),
       });
 
       const data = await response.json();
       
       if (response.ok) {
-        // Store the token
         await AsyncStorage.setItem('userToken', data.token);
-        await AsyncStorage.setItem('userType', isUserSide ? 'user' : 'restaurant');
+        await AsyncStorage.setItem('userId', data.userId);
+        await AsyncStorage.setItem('userType', data.userType);
         
-        // Navigate to main app
         navigation.reset({
           index: 0,
           routes: [{ name: 'MainApp' }],
         });
       } else {
-        Alert.alert('Error', data.error || 'Login failed');
+        Alert.alert('Error', data.message || 'Login failed');
       }
     } catch (error) {
+      console.error('Login error:', error);
       Alert.alert('Error', 'Network error. Please try again.');
     } finally {
       setLoading(false);
     }
-  };
+};
 
   return (
     <View style={styles.container}>
