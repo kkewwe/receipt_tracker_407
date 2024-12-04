@@ -19,6 +19,11 @@ export default function RegisterScreen({ navigation, route }) {
 
   return (
     <View style={styles.container}>
+      {/* Back Button */}
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+        <Text style={styles.backButtonText}>← Back to home</Text>
+      </TouchableOpacity>
+
       <Text style={styles.title}>{isUserSide ? 'User Sign Up' : 'Restaurant Sign Up'}</Text>
 
       <Text style={styles.label}>Username:</Text>
@@ -80,6 +85,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
+  },
+  backButton: {
+    position: 'absolute',
+    top: 40,
+    left: 20,
+  },
+  backButtonText: {
+    fontSize: 18,
+    color: '#000',
   },
   title: {
     fontSize: 24,
