@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_URL = 'http://10.140.149.173:5000'; // Change to your server IP when testing on physical device
+const API_URL = 'https://receipt-tracker-407.onrender.com';
 
 export default function LoginScreen({ navigation, route }) {
   const [email, setEmail] = useState('');

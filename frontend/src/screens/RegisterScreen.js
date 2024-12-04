@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
 
-const API_URL = 'http://10.140.149.173:5000'; 
+const API_URL = 'https://receipt-tracker-407.onrender.com'; 
 
 export default function RegisterScreen({ navigation, route }) {
   const [username, setUsername] = useState('');
