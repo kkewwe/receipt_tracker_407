@@ -5,14 +5,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const API_URL = 'https://receipt-tracker-407.onrender.com';
 
 export default function LoginScreen({ navigation, route }) {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   
   const { isUserSide } = route.params;
   
   const handleSignIn = async () => {
-    if (!email || !password) {
+    if (!username || !password) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
@@ -25,7 +25,7 @@ export default function LoginScreen({ navigation, route }) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email,
+          username,
           password,
           userType: isUserSide ? 'client' : 'restaurant' 
         }),
@@ -51,7 +51,7 @@ export default function LoginScreen({ navigation, route }) {
     } finally {
       setLoading(false);
     }
-};
+  };
 
   return (
     <View style={styles.container}>
@@ -66,10 +66,9 @@ export default function LoginScreen({ navigation, route }) {
       
       <TextInput
         style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
+        placeholder="Username"
+        value={username}
+        onChangeText={setUsername}
         autoCapitalize="none"
         autoCorrect={false}
         editable={!loading}
@@ -101,7 +100,7 @@ export default function LoginScreen({ navigation, route }) {
         disabled={loading}
       >
         <Text style={styles.registerText}>
-          {isUserSide ? 'Not registered? Register as User' : 'Not registered? Register as Restaurant'}
+          Not registered? Sign up
         </Text>
       </TouchableOpacity>
     </View>
@@ -109,17 +108,18 @@ export default function LoginScreen({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 40,
+    marginTop: 60, 
+  },
+  container: {
+    flexGrow: 1,
+    backgroundColor: '#f5f5f5',
+    alignItems: 'center',
+    padding: 20,
+    paddingTop: 100, 
   },
   input: {
     width: '100%',
@@ -129,6 +129,7 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderRadius: 5,
     marginBottom: 15,
+    backgroundColor: 'white',
   },
   button: {
     backgroundColor: '#000',
@@ -138,6 +139,9 @@ const styles = StyleSheet.create({
     maxWidth: 300,
     alignItems: 'center',
     marginBottom: 10,
+  },
+  buttonDisabled: {
+    backgroundColor: '#666',
   },
   buttonText: {
     color: 'white',

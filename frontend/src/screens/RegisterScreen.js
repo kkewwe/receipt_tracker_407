@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, ScrollView } from 'react-native';
 
 const API_URL = 'https://receipt-tracker-407.onrender.com'; 
 
@@ -8,14 +8,16 @@ export default function RegisterScreen({ navigation, route }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [address, setAddress] = useState('');
+  const [description, setDescription] = useState('');
+  const [categories, setCategories] = useState('');
   const [loading, setLoading] = useState(false);
   
   const { isUserSide } = route.params;
 
   const handleRegister = async () => {
-    console.log('Registration started');
-    if (!email || !password || !confirmPassword || !username) {
-      Alert.alert('Error', 'Please fill in all fields');
+    if (!username || !password || !confirmPassword || !email || (!isUserSide && !address)) {
+      Alert.alert('Error', 'Please fill in all required fields');
       return;
     }
   
@@ -26,17 +28,7 @@ export default function RegisterScreen({ navigation, route }) {
   
     setLoading(true);
     try {
-      const endpoint = isUserSide ? '/api/auth/register' : '/api/auth/register';
-      console.log('Making request to:', API_URL + endpoint); 
-      console.log('With body:', {  
-        email,
-        password,
-        name: username,
-        userType: isUserSide ? 'client' : 'restaurant',
-        ...(isUserSide ? {} : { address: 'Default Address' }),
-      });
-      
-      const response = await fetch(API_URL + endpoint, {
+      const response = await fetch(`${API_URL}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -46,19 +38,31 @@ export default function RegisterScreen({ navigation, route }) {
           password,
           name: username,
           userType: isUserSide ? 'client' : 'restaurant',
-          ...(isUserSide ? {} : { address: 'Default Address' }),
+          ...(isUserSide ? {} : {
+            address,
+            description,
+            categories: categories.split(',').map(cat => cat.trim()),
+            businessHours: {
+              monday: { open: '9:00', close: '17:00' },
+              tuesday: { open: '9:00', close: '17:00' },
+              wednesday: { open: '9:00', close: '17:00' },
+              thursday: { open: '9:00', close: '17:00' },
+              friday: { open: '9:00', close: '17:00' },
+              saturday: { open: '10:00', close: '15:00' },
+              sunday: { open: 'closed', close: 'closed' }
+            }
+          }),
         }),
       });
   
-      console.log('Response status:', response.status);
       const data = await response.json();
-      console.log('Response data:', data);  
         
       if (response.ok) {
-        alert('Registration successful');
-        navigation.navigate('Login', { isUserSide });
+        Alert.alert('Success', 'Registration successful', [
+          { text: 'OK', onPress: () => navigation.navigate('Login', { isUserSide }) }
+        ]);
       } else {
-        alert(data.error || 'Registration failed');
+        Alert.alert('Error', data.error || 'Registration failed');
       }
     } catch (error) {
       Alert.alert('Error', 'Network error. Please try again.');
@@ -69,7 +73,7 @@ export default function RegisterScreen({ navigation, route }) {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <TouchableOpacity 
         style={styles.backButton}
         onPress={() => navigation.navigate('Home')}
@@ -78,16 +82,15 @@ export default function RegisterScreen({ navigation, route }) {
       </TouchableOpacity>
 
       <Text style={styles.title}>{isUserSide ? 'User Sign Up' : 'Restaurant Sign Up'}</Text>
-
+  
       <Text style={styles.label}>Username:</Text>
       <TextInput
         style={styles.input}
-        placeholder={isUserSide ? "Enter User Name" : "Enter Restaurant Name"}
+        placeholder={isUserSide ? "Enter Username" : "Enter Restaurant Name"}
         value={username}
         onChangeText={setUsername}
-        autoCapitalize="none"
       />
-
+    
       <Text style={styles.label}>Email:</Text>
       <TextInput
         style={styles.input}
@@ -97,6 +100,36 @@ export default function RegisterScreen({ navigation, route }) {
         keyboardType="email-address"
         autoCapitalize="none"
       />
+
+      {!isUserSide && (
+        <>
+          <Text style={styles.label}>Address:</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter Address"
+            value={address}
+            onChangeText={setAddress}
+          />
+
+          <Text style={styles.label}>Description:</Text>
+          <TextInput
+            style={[styles.input, styles.textArea]}
+            placeholder="Enter Restaurant Description"
+            value={description}
+            onChangeText={setDescription}
+            multiline
+            numberOfLines={4}
+          />
+
+          <Text style={styles.label}>Categories:</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter Categories (comma-separated)"
+            value={categories}
+            onChangeText={setCategories}
+          />
+        </>
+      )}
 
       <Text style={styles.label}>Password:</Text>
       <TextInput
@@ -118,22 +151,31 @@ export default function RegisterScreen({ navigation, route }) {
         autoCapitalize="none"
       />
 
-      <TouchableOpacity style={styles.button} onPress={handleRegister}>
-        <Text style={styles.buttonText}>Sign Up</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity onPress={() => navigation.navigate('Login', { isUserSide })}>
-        <Text style={styles.loginText}>
-          {isUserSide ? 'Already a user? Log in as User' : 'Already a user? Log in as Restaurant'}
+      <TouchableOpacity 
+        style={[styles.button, loading && styles.buttonDisabled]} 
+        onPress={handleRegister}
+        disabled={loading}
+      >
+        <Text style={styles.buttonText}>
+          {loading ? 'Signing Up...' : 'Sign Up'}
         </Text>
       </TouchableOpacity>
-    </View>
+
+      <TouchableOpacity 
+        onPress={() => navigation.navigate('Login', { isUserSide })}
+        disabled={loading}
+      >
+        <Text style={styles.loginText}>
+          Already registered? Log in
+        </Text>
+      </TouchableOpacity>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: '#f5f5f5',
     alignItems: 'center',
     justifyContent: 'center',
@@ -143,6 +185,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 40,
+    marginTop: 40,
   },
   label: {
     width: '100%',
@@ -159,6 +202,11 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderRadius: 5,
     marginBottom: 15,
+    backgroundColor: 'white',
+  },
+  textArea: {
+    height: 100,
+    textAlignVertical: 'top',
   },
   button: {
     backgroundColor: '#000',
@@ -168,6 +216,9 @@ const styles = StyleSheet.create({
     maxWidth: 300,
     alignItems: 'center',
     marginBottom: 10,
+  },
+  buttonDisabled: {
+    backgroundColor: '#666',
   },
   buttonText: {
     color: 'white',
