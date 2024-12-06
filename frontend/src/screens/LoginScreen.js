@@ -1,3 +1,5 @@
+// src/screens/LoginScreen.js
+
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -8,7 +10,8 @@ export default function LoginScreen({ navigation, route }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
+  // Destructure isUserSide from route.params
   const { isUserSide } = route.params;
   
   const handleSignIn = async () => {
@@ -20,7 +23,6 @@ export default function LoginScreen({ navigation, route }) {
     setLoading(true);
     try {
       const requestBody = {
-        // For restaurants, send username. For clients, send name
         ...(isUserSide ? { name: username } : { username }),
         password,
         userType: isUserSide ? 'client' : 'restaurant'
@@ -29,9 +31,7 @@ export default function LoginScreen({ navigation, route }) {
   
       const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),
       });
   
@@ -43,9 +43,10 @@ export default function LoginScreen({ navigation, route }) {
         await AsyncStorage.setItem('userId', data.userId);
         await AsyncStorage.setItem('userType', data.userType);
         
+        // Pass isUserSide to MainApp
         navigation.reset({
           index: 0,
-          routes: [{ name: 'MainApp' }],
+          routes: [{ name: 'MainApp', params: { isUserSide } }],
         });
       } else {
         Alert.alert('Error', data.message || 'Login failed');
