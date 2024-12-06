@@ -65,7 +65,7 @@ export default function LoginScreen({ navigation, route }) {
       setLoading(false);
     }
   };
-
+  
   return (
     <View style={styles.container}>
       <TouchableOpacity 

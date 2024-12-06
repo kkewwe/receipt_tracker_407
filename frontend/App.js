@@ -1,9 +1,18 @@
 // App.js
 
 import React from 'react';
+// App.js
+
+import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+
+// Import navigators and screens
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Ionicons } from '@expo/vector-icons';
+
+import HomeScreen from './src/screens/HomeScreen';
+import LoginScreen from './src/screens/LoginScreen';
 import { Ionicons } from '@expo/vector-icons';
 
 import HomeScreen from './src/screens/HomeScreen';
@@ -12,22 +21,30 @@ import RegisterScreen from './src/screens/RegisterScreen';
 import ClientDashboard from './src/screens/ClientDashboard';
 import RestaurantDashboard from './src/screens/RestaurantDashboard';
 import CreateOrderScreen from './src/screens/CreateOrderScreen';
+import RestaurantDashboard from './src/screens/RestaurantDashboard';
+import CreateOrderScreen from './src/screens/CreateOrderScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
+import QRCodeScannerScreen from './src/screens/QRCodeScannerScreen';
 import QRCodeScannerScreen from './src/screens/QRCodeScannerScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function ClientTabNavigator() {
+function ClientTabNavigator() {
   return (
     <Tab.Navigator
       initialRouteName="Dashboard"
+      initialRouteName="Dashboard"
       screenOptions={({ route }) => ({
+        headerShown: false,
         headerShown: false,
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
           if (route.name === 'Dashboard') {
             iconName = focused ? 'home' : 'home-outline';
+          } else if (route.name === 'QR Scan') {
+            iconName = focused ? 'qr-code' : 'qr-code-outline';
           } else if (route.name === 'QR Scan') {
             iconName = focused ? 'qr-code' : 'qr-code-outline';
           } else if (route.name === 'Settings') {
@@ -85,9 +102,13 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {/* Authentication Screens */}
+        {/* Authentication Screens */}
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
+
+        {/* Main App after login */}
+        <Stack.Screen name="MainApp" component={MainApp} />
 
         {/* Main App after login */}
         <Stack.Screen name="MainApp" component={MainApp} />
@@ -95,3 +116,4 @@ export default function App() {
     </NavigationContainer>
   );
 }
+
