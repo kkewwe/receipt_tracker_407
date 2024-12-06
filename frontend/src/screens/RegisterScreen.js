@@ -39,7 +39,8 @@ export default function RegisterScreen({ navigation, route }) {
           email,
           password,
           name: isUserSide ? username : restaurantName,
-          username: username,
+          // Only include username for restaurants
+          ...(isUserSide ? {} : { username }),
           userType: isUserSide ? 'client' : 'restaurant',
           ...(isUserSide ? {} : {
             address,

@@ -20,9 +20,10 @@ export default function LoginScreen({ navigation, route }) {
     setLoading(true);
     try {
       const requestBody = {
-        name: username,
+        // For restaurants, send username. For clients, send name
+        ...(isUserSide ? { name: username } : { username }),
         password,
-        userType: isUserSide ? 'client' : 'restaurant' 
+        userType: isUserSide ? 'client' : 'restaurant'
       };
       console.log('Sending login request:', requestBody);
   
