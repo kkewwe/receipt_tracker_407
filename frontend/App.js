@@ -31,20 +31,15 @@ const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function ClientTabNavigator() {
-function ClientTabNavigator() {
   return (
     <Tab.Navigator
       initialRouteName="Dashboard"
-      initialRouteName="Dashboard"
       screenOptions={({ route }) => ({
-        headerShown: false,
         headerShown: false,
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
           if (route.name === 'Dashboard') {
             iconName = focused ? 'home' : 'home-outline';
-          } else if (route.name === 'QR Scan') {
-            iconName = focused ? 'qr-code' : 'qr-code-outline';
           } else if (route.name === 'QR Scan') {
             iconName = focused ? 'qr-code' : 'qr-code-outline';
           } else if (route.name === 'Settings') {
@@ -102,13 +97,9 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {/* Authentication Screens */}
-        {/* Authentication Screens */}
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
-
-        {/* Main App after login */}
-        <Stack.Screen name="MainApp" component={MainApp} />
 
         {/* Main App after login */}
         <Stack.Screen name="MainApp" component={MainApp} />
