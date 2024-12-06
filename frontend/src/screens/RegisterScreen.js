@@ -5,9 +5,10 @@ const API_URL = 'https://receipt-tracker-407.onrender.com';
 
 export default function RegisterScreen({ navigation, route }) {
   const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
+  const [restaurantName, setRestaurantName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [email, setEmail] = useState('');
   const [address, setAddress] = useState('');
   const [description, setDescription] = useState('');
   const [categories, setCategories] = useState('');
@@ -16,7 +17,8 @@ export default function RegisterScreen({ navigation, route }) {
   const { isUserSide } = route.params;
 
   const handleRegister = async () => {
-    if (!username || !password || !confirmPassword || !email || (!isUserSide && !address)) {
+    if (!username || !password || !confirmPassword || !email || 
+        (!isUserSide && (!address || !restaurantName))) {
       Alert.alert('Error', 'Please fill in all required fields');
       return;
     }
@@ -36,7 +38,8 @@ export default function RegisterScreen({ navigation, route }) {
         body: JSON.stringify({
           email,
           password,
-          name: username,
+          name: isUserSide ? username : restaurantName,
+          username: username,
           userType: isUserSide ? 'client' : 'restaurant',
           ...(isUserSide ? {} : {
             address,
@@ -80,18 +83,48 @@ export default function RegisterScreen({ navigation, route }) {
       >
         <Text style={styles.backButtonText}>← Back</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-        <Text style={styles.backButtonText}>← Back to home</Text>
-      </TouchableOpacity>
 
       <Text style={styles.title}>{isUserSide ? 'User Sign Up' : 'Restaurant Sign Up'}</Text>
-  
+
       <Text style={styles.label}>Username:</Text>
       <TextInput
         style={styles.input}
-        placeholder={isUserSide ? "Enter Username" : "Enter Restaurant Name"}
+        placeholder="Enter Username"
         value={username}
         onChangeText={setUsername}
+        autoCapitalize="none"
+      />
+
+      {!isUserSide && (
+        <>
+          <Text style={styles.label}>Restaurant Name:</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter Restaurant Name"
+            value={restaurantName}
+            onChangeText={setRestaurantName}
+          />
+        </>
+      )}
+
+      <Text style={styles.label}>Password:</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Enter Password"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+        autoCapitalize="none"
+      />
+
+      <Text style={styles.label}>Confirm Password:</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Confirm Password"
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
+        secureTextEntry
+        autoCapitalize="none"
       />
     
       <Text style={styles.label}>Email:</Text>
@@ -134,26 +167,6 @@ export default function RegisterScreen({ navigation, route }) {
         </>
       )}
 
-      <Text style={styles.label}>Password:</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        autoCapitalize="none"
-      />
-
-      <Text style={styles.label}>Confirm Password:</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Confirm Password"
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        secureTextEntry
-        autoCapitalize="none"
-      />
-
       <TouchableOpacity 
         style={[styles.button, loading && styles.buttonDisabled]} 
         onPress={handleRegister}
@@ -181,23 +194,14 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     backgroundColor: '#f5f5f5',
     alignItems: 'center',
-    justifyContent: 'center',
     padding: 20,
-  },
-  backButton: {
-    position: 'absolute',
-    top: 40,
-    left: 20,
-  },
-  backButtonText: {
-    fontSize: 18,
-    color: '#000',
+    paddingTop: 100,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 40,
-    marginTop: 40,
+    marginTop: 60,
   },
   label: {
     width: '100%',
