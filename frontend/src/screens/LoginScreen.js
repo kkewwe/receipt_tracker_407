@@ -9,15 +9,15 @@ export default function LoginScreen({ navigation, route }) {
   
   const handleSignIn = () => {
     console.log(isUserSide ? 'User Login' : 'Restaurant Login');
-    console.log('Email:', email);
-    console.log('Password:', password);
+    //console.log('Email:', email);
+    //console.log('Password:', password);
     
     navigation.reset({
       index: 0,
-      routes: [{ name: 'MainApp' }],
+      routes: [{ name: 'MainApp', params: { isUserSide } }],
     });
   };
-
+  
   return (
     <View style={styles.container}>
       {/* Back Button */}
