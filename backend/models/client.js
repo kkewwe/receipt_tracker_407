@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 
 const clientSchema = new mongoose.Schema({
-  clientID: { type: String, unique: true, required: true },
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
@@ -20,7 +19,17 @@ const clientSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
+// Add pre-save middleware to handle clientID generation
+clientSchema.pre('save', async function(next) {
+  if (this.isNew) {
+    const count = await this.constructor.countDocuments();
+    this.clientID = `CL${String(count + 1).padStart(6, '0')}`;
+  }
+  next();
+});
+
 clientSchema.index({ email: 1 });
+clientSchema.index({ name: 1 }); // Add index for name lookups
 clientSchema.index({ 'orders.scanDate': -1 });
 
 module.exports = mongoose.model('Client', clientSchema);

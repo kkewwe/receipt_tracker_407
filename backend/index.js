@@ -23,22 +23,24 @@ mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
 
-// Registration route
-app.post('/api/auth/register', [
-  body('email').isEmail(),
-  body('password').isLength({ min: 6 }),
-  body('userType').isIn(['client', 'restaurant'])
-], async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+  app.post('/api/auth/register', [
+    body('email').isEmail(),
+    body('name').notEmpty().withMessage('Username is required'),  // Added this
+    body('password').isLength({ min: 6 }),
+    body('userType').isIn(['client', 'restaurant'])
+  ], async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
 
     const { email, password, userType, name } = req.body;
     const Model = userType === 'client' ? Client : Restaurant;
     
-    const existingUser = await Model.findOne({ email });
+    const existingUser = await Model.findOne({ 
+      $or: [{ email }, { name }] 
+    });
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' });
     }
@@ -72,25 +74,29 @@ app.post('/api/auth/register', [
   }
 });
 
-// Login route
 app.post('/api/auth/login', async (req, res) => {
   try {
-    const { email, password, userType } = req.body;
+    console.log('Received login request:', req.body); // Add this for debugging
     
-    if (!email || !password || !userType) {
-      return res.status(400).json({ message: 'Please provide all required fields' });
+    const { name, password, userType } = req.body;
+    
+    if (!name || !password || !userType) {
+      return res.status(400).json({ 
+        message: 'Please provide all required fields',
+        received: { name, password, userType } // Add this for debugging
+      });
     }
 
     const Model = userType === 'client' ? Client : Restaurant;
     
-    const user = await Model.findOne({ email });
+    const user = await Model.findOne({ name });
     if (!user) {
-      return res.status(401).json({ message: 'Authentication failed' });
+      return res.status(401).json({ message: 'Username not found' });
     }
 
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
-      return res.status(401).json({ message: 'Authentication failed' });
+      return res.status(401).json({ message: 'Password incorrect' });
     }
 
     const token = jwt.sign(

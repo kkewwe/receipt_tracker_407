@@ -16,22 +16,26 @@ export default function LoginScreen({ navigation, route }) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
-
+  
     setLoading(true);
     try {
+      const requestBody = {
+        name: username,
+        password,
+        userType: isUserSide ? 'client' : 'restaurant' 
+      };
+      console.log('Sending login request:', requestBody);
+  
       const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          username,
-          password,
-          userType: isUserSide ? 'client' : 'restaurant' 
-        }),
+        body: JSON.stringify(requestBody),
       });
-
+  
       const data = await response.json();
+      console.log('Server response:', data);
       
       if (response.ok) {
         await AsyncStorage.setItem('userToken', data.token);
@@ -46,8 +50,15 @@ export default function LoginScreen({ navigation, route }) {
         Alert.alert('Error', data.message || 'Login failed');
       }
     } catch (error) {
-      console.error('Login error:', error);
-      Alert.alert('Error', 'Network error. Please try again.');
+      console.error('Login error details:', {
+        message: error.message,
+        cause: error.cause,
+        stack: error.stack
+      });
+      Alert.alert(
+        'Error', 
+        `Connection failed. Please check your internet connection and try again. (${error.message})`
+      );
     } finally {
       setLoading(false);
     }
