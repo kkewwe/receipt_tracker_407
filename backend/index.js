@@ -12,7 +12,6 @@ const Restaurant = require('./models/restaurant');
 const Dish = require('./models/dish');
 
 const app = express();
-const JWT_SECRET = process.env.JWT_SECRET;
 
 // Middleware
 app.use(cors({ origin: '*' }));
@@ -59,7 +58,7 @@ app.post('/api/auth/register', async (req, res) => {
     const newUser = new Model(userData);
     await newUser.save();
 
-    const token = jwt.sign({ userId: newUser._id, userType }, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ userId: newUser._id, userType }, { expiresIn: '1h' });
 
     res.status(201).json({
       message: 'Registration successful',
@@ -91,7 +90,7 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(401).json({ message: 'Incorrect password' });
     }
 
-    const token = jwt.sign({ userId: user._id, userType }, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ userId: user._id, userType }, { expiresIn: '1h' });
 
     res.json({ message: 'Login successful', token, userId: user._id, userType });
   } catch (error) {
