@@ -1,16 +1,16 @@
-// src/screens/CreateOrderScreen.js
-
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, FlatList } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, FlatList, Alert, Image } from 'react-native';
+
+const API_URL = 'https://receipt-tracker-407.onrender.com';
 
 export default function CreateOrderScreen() {
   const [selectedDishes, setSelectedDishes] = useState([]);
+  const [qrCode, setQrCode] = useState(null);
 
   const dishes = [
     { id: '1', name: 'Spaghetti Bolognese' },
     { id: '2', name: 'Margherita Pizza' },
     { id: '3', name: 'Caesar Salad' },
-    // ... other dishes
   ];
 
   const toggleDishSelection = (dishId) => {
@@ -18,6 +18,37 @@ export default function CreateOrderScreen() {
       setSelectedDishes(selectedDishes.filter((id) => id !== dishId));
     } else {
       setSelectedDishes([...selectedDishes, dishId]);
+    }
+  };
+
+  const handleGenerateQR = async () => {
+    if (selectedDishes.length === 0) {
+      Alert.alert('Error', 'Please select at least one dish.');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/generate-qr`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          dishes: selectedDishes,
+          restaurantID: '12345',
+        }),
+      });
+
+      if (!response.ok) {
+        const errorDetails = await response.text();
+        console.error('Error details:', errorDetails);
+        throw new Error(`Failed to generate QR: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      setQrCode(data.qrCode);
+      Alert.alert('Success', 'QR Code generated successfully!');
+    } catch (error) {
+      console.error('Error in handleGenerateQR:', error);
+      Alert.alert('Error', error.message || 'Failed to generate QR Code.');
     }
   };
 
@@ -52,15 +83,21 @@ export default function CreateOrderScreen() {
         extraData={selectedDishes}
       />
 
-      <TouchableOpacity style={styles.createQRButton}>
-        <Text style={styles.createQRButtonText}>Create QR Code</Text>
+      <TouchableOpacity style={styles.createQRButton} onPress={handleGenerateQR}>
+        <Text style={styles.createQRButtonText}>Generate QR Code</Text>
       </TouchableOpacity>
+
+      {qrCode && (
+        <View style={styles.qrCodeContainer}>
+          <Text style={styles.qrCodeText}>Generated QR Code:</Text>
+          <Image source={{ uri: qrCode }} style={styles.qrCodeImage} />
+        </View>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  // Styles for CreateOrderScreen
   container: {
     flex: 1,
     padding: 20,
@@ -102,5 +139,18 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
+  },
+  qrCodeContainer: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  qrCodeText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  qrCodeImage: {
+    width: 200,
+    height: 200,
   },
 });

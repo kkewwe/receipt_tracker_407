@@ -1,74 +1,44 @@
 const express = require('express');
 const mongoose = require('mongoose');
 require('dotenv').config();
-
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { body, validationResult } = require('express-validator');
+const QRCode = require('qrcode');
 
-const app = express();
-
-// Middleware
-app.use(cors());
-app.use(express.json());
-
+// Import models
 const Client = require('./models/client');
 const Restaurant = require('./models/restaurant');
+const Dish = require('./models/dish');
 
-const JWT_SECRET = 'your_jwt_secret_key';
+const app = express();
+const JWT_SECRET = process.env.JWT_SECRET;
+
+// Middleware
+app.use(cors({ origin: '*' }));
+app.use(express.json());
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI)
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
 
-app.post('/api/auth/register', [
-  body('email').isEmail(),
-  body('name').notEmpty().withMessage('Name is required'),
-  body('password').isLength({ min: 6 }),
-  body('userType').isIn(['client', 'restaurant']),
-  body('username').custom((value, { req }) => {
-    if (req.body.userType === 'restaurant' && !value) {
-      throw new Error('Username is required for restaurants');
-    }
-    return true;
-  })
-], async (req, res) => {
+// Registration Endpoint
+app.post('/api/auth/register', async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
     const { email, password, userType, name, username } = req.body;
+
     const Model = userType === 'client' ? Client : Restaurant;
-    
-    // Check for existing user - different checks for client and restaurant
-    const searchQuery = userType === 'client' 
+    const searchQuery = userType === 'client'
       ? { $or: [{ email }, { name }] }
       : { $or: [{ email }, { username }, { name }] };
-    
+
     const existingUser = await Model.findOne(searchQuery);
     if (existingUser) {
-      if (existingUser.email === email) {
-        return res.status(400).json({ message: 'Email already exists' });
-      }
-      if (userType === 'client' && existingUser.name === name) {
-        return res.status(400).json({ message: 'Name already exists' });
-      }
-      if (userType === 'restaurant') {
-        if (existingUser.username === username) {
-          return res.status(400).json({ message: 'Username already exists' });
-        }
-        if (existingUser.name === name) {
-          return res.status(400).json({ message: 'Restaurant name already exists' });
-        }
-      }
+      return res.status(400).json({ message: 'User already exists' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
-    
     const userData = {
       email,
       password: hashedPassword,
@@ -78,89 +48,99 @@ app.post('/api/auth/register', [
         restaurantID: `REST-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         address: req.body.address,
         description: req.body.description || '',
-        categories: req.body.categories ? req.body.categories : [],
-        businessHours: {
+        categories: req.body.categories || [],
+        businessHours: req.body.businessHours || {
           monday: { open: '9:00', close: '17:00' },
           tuesday: { open: '9:00', close: '17:00' },
-          wednesday: { open: '9:00', close: '17:00' },
-          thursday: { open: '9:00', close: '17:00' },
-          friday: { open: '9:00', close: '17:00' },
-          saturday: { open: '10:00', close: '15:00' },
-          sunday: { open: 'closed', close: 'closed' }
-        }
-      })
+        },
+      }),
     };
 
     const newUser = new Model(userData);
     await newUser.save();
 
-    const token = jwt.sign(
-      { userId: newUser._id, userType },
-      JWT_SECRET,
-      { expiresIn: '1h' }
-    );
+    const token = jwt.sign({ userId: newUser._id, userType }, JWT_SECRET, { expiresIn: '1h' });
 
     res.status(201).json({
       message: 'Registration successful',
       token,
       userId: newUser._id,
-      userType
+      userType,
     });
-
   } catch (error) {
     console.error('Registration error:', error);
     res.status(500).json({ message: 'Registration failed', error: error.message });
   }
 });
 
+// Login Endpoint
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { username, name, password, userType } = req.body;
-    
-    // Validate required fields based on user type
-    if (userType === 'client' && (!name || !password)) {
-      return res.status(400).json({ message: 'Please provide name and password' });
-    }
-    if (userType === 'restaurant' && (!username || !password)) {
-      return res.status(400).json({ message: 'Please provide username and password' });
-    }
 
     const Model = userType === 'client' ? Client : Restaurant;
-    
-    // Different login field based on user type
     const searchQuery = userType === 'client' ? { name } : { username };
-    
+
     const user = await Model.findOne(searchQuery);
     if (!user) {
-      return res.status(401).json({ 
-        message: userType === 'client' ? 'User name not found' : 'Username not found'
-      });
+      return res.status(401).json({ message: 'User not found' });
     }
 
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
-      return res.status(401).json({ message: 'Password incorrect' });
+      return res.status(401).json({ message: 'Incorrect password' });
     }
 
-    const token = jwt.sign(
-      { userId: user._id, userType },
-      JWT_SECRET,
-      { expiresIn: '1h' }
-    );
+    const token = jwt.sign({ userId: user._id, userType }, JWT_SECRET, { expiresIn: '1h' });
 
-    res.json({
-      message: 'Login successful',
-      token,
-      userId: user._id,
-      userType
-    });
-
+    res.json({ message: 'Login successful', token, userId: user._id, userType });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ message: 'Login failed', error: error.message });
   }
 });
 
+// QR Code Generation Endpoint
+app.post('/generate-qr', async (req, res) => {
+  console.log('Received request at /generate-qr:', req.body);
+
+  try {
+    const { dishes, restaurantID } = req.body;
+
+    if (!dishes || dishes.length === 0) {
+      return res.status(400).json({ message: 'No dishes provided to generate QR code.' });
+    }
+
+    const selectedDishes = await Dish.find({ dishID: { $in: dishes }, restaurantID });
+    if (!selectedDishes || selectedDishes.length === 0) {
+      return res.status(404).json({ message: 'No matching dishes found.' });
+    }
+
+    const order = {
+      restaurantID,
+      dishes: selectedDishes.map((dish) => ({
+        dishID: dish.dishID,
+        name: dish.name,
+        price: dish.cost,
+      })),
+    };
+
+    const qrData = JSON.stringify(order);
+    const qrCode = await QRCode.toDataURL(qrData);
+
+    res.status(200).json({ qrCode, message: 'QR Code generated successfully' });
+  } catch (error) {
+    console.error('QR Generation error:', error);
+    res.status(500).json({ message: 'Failed to generate QR code', error: error.message });
+  }
+});
+
+// Default Route
+app.get('/', (req, res) => {
+  res.send('API is running...');
+});
+
+// Start Server
 const port = process.env.PORT || 5000;
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);

@@ -1,18 +1,9 @@
-// App.js
 
-import React from 'react';
-// App.js
 
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-
-// Import navigators and screens
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Ionicons } from '@expo/vector-icons';
-
-import HomeScreen from './src/screens/HomeScreen';
-import LoginScreen from './src/screens/LoginScreen';
 import { Ionicons } from '@expo/vector-icons';
 
 import HomeScreen from './src/screens/HomeScreen';
@@ -21,10 +12,7 @@ import RegisterScreen from './src/screens/RegisterScreen';
 import ClientDashboard from './src/screens/ClientDashboard';
 import RestaurantDashboard from './src/screens/RestaurantDashboard';
 import CreateOrderScreen from './src/screens/CreateOrderScreen';
-import RestaurantDashboard from './src/screens/RestaurantDashboard';
-import CreateOrderScreen from './src/screens/CreateOrderScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
-import QRCodeScannerScreen from './src/screens/QRCodeScannerScreen';
 import QRCodeScannerScreen from './src/screens/QRCodeScannerScreen';
 
 const Stack = createStackNavigator();

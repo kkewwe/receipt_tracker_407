@@ -10,7 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/kkewwe/receipt_tracker_407.git"
   },
-  "author": "Kelly + Artem",
+  "author": "Kelly, Arden, Harshit, Artem",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/kkewwe/receipt_tracker_407/issues"
@@ -21,11 +21,11 @@
     "body-parser": "^1.20.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
-    "express": "^4.21.1",
+    "express": "^4.21.2",
     "express-validator": "^7.2.0",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.11.0",
-    "mongoose": "^8.8.3",
+    "mongoose": "^8.8.4",
     "qrcode": "^1.5.4",
     "react-native-camera": "^4.2.1",
     "react-native-permissions": "^5.2.1",
