@@ -183,6 +183,85 @@ app.post('/api/restaurant/dishes', async (req, res) => {
   }
 });
 
+app.post('/api/restaurant/create-order', async (req, res) => {
+  try {
+    const { restaurantID, dishes } = req.body;
+
+    // Validate input
+    if (!restaurantID || !dishes || !dishes.length) {
+      return res.status(400).json({
+        message: 'Restaurant ID and dishes are required'
+      });
+    }
+
+    console.log('Creating order:', { restaurantID, dishes });
+
+    // Fetch dish details to calculate totals
+    const dishDetails = await Dish.find({
+      dishID: { $in: dishes.map(d => d.dishID) },
+      restaurantID
+    });
+
+    if (!dishDetails.length) {
+      return res.status(404).json({
+        message: 'No valid dishes found'
+      });
+    }
+
+    // Calculate order totals
+    const dishMap = Object.fromEntries(
+      dishDetails.map(dish => [dish.dishID, dish])
+    );
+
+    const orderDishes = dishes.map(dish => ({
+      dishID: dish.dishID,
+      name: dishMap[dish.dishID].name,
+      quantity: dish.quantity,
+      price: dishMap[dish.dishID].cost
+    }));
+
+    const subtotal = orderDishes.reduce(
+      (sum, dish) => sum + (dish.price * dish.quantity),
+      0
+    );
+
+    // Create new order
+    const order = new Order({
+      orderID: `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      restaurantID,
+      dishes: orderDishes,
+      subtotal,
+      total: subtotal, // Add tax/discount logic if needed
+      status: 'pending'
+    });
+
+    await order.save();
+    console.log('Order saved:', order);
+
+    // Generate QR code
+    const qrData = JSON.stringify({
+      orderID: order.orderID,
+      restaurantID,
+      total: order.total
+    });
+
+    const qrCode = await QRCode.toDataURL(qrData);
+
+    res.status(201).json({
+      message: 'Order created successfully',
+      order,
+      qrCode
+    });
+
+  } catch (error) {
+    console.error('Error creating order:', error);
+    res.status(500).json({
+      message: 'Failed to create order',
+      error: error.message
+    });
+  }
+});
+
 // Start server
 const port = process.env.PORT || 5000;
 app.listen(port, () => {

@@ -87,34 +87,70 @@ export default function CreateOrderScreen({ navigation }) {
     ));
   };
 
-  const handleCreateOrder = async () => {
-    if (selectedDishes.length === 0) {
-      Alert.alert('Error', 'Please select at least one dish.');
-      return;
-    }
+  // In CreateOrderScreen.js, update the handleCreateOrder function
+const handleCreateOrder = async () => {
+  if (selectedDishes.length === 0) {
+    Alert.alert('Error', 'Please select at least one dish.');
+    return;
+  }
 
+  try {
+    const orderData = {
+      restaurantID,
+      dishes: selectedDishes.map(dish => ({
+        dishID: dish.dishID,
+        quantity: dish.quantity
+      }))
+    };
+
+    console.log('Sending order data:', orderData);
+
+    const response = await fetch(`${API_URL}/api/restaurant/create-order`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(orderData),
+    });
+
+    const responseText = await response.text();
+    console.log('Raw order response:', responseText);
+
+    let data;
     try {
-      const response = await fetch(`${API_URL}/api/restaurant/create-order`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          restaurantID,
-          dishes: selectedDishes.map(dish => ({
-            dishID: dish.dishID,
-            quantity: dish.quantity
-          }))
-        }),
-      });
-
-      if (!response.ok) throw new Error('Failed to create order');
-
-      const data = await response.json();
-      setQrCode(data.qrCode);
-      Alert.alert('Success', 'Order created and QR Code generated!');
-    } catch (error) {
-      Alert.alert('Error', error.message);
+      data = JSON.parse(responseText);
+    } catch (e) {
+      console.error('Error parsing order response:', e);
+      throw new Error('Invalid server response');
     }
-  };
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to create order');
+    }
+
+    setQrCode(data.qrCode);
+    Alert.alert(
+      'Success', 
+      'Order created and QR Code generated!',
+      [
+        {
+          text: 'OK',
+          onPress: () => {
+            // Optionally reset the form or navigate away
+            setSelectedDishes([]);
+          }
+        }
+      ]
+    );
+  } catch (error) {
+    console.error('Order creation error:', error);
+    Alert.alert(
+      'Error',
+      error.message || 'Failed to create order. Please try again.'
+    );
+  }
+};
 
   const renderDish = ({ item }) => {
     const isSelected = selectedDishes.some(d => d.dishID === item.dishID);
