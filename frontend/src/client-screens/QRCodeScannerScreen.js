@@ -9,20 +9,24 @@ export default function QRCodeScannerScreen({ navigation }) {
   const [hasPermission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    (async () => {
-      if (!hasPermission?.granted) {
-        await requestPermission();
-      }
-    })();
-  }, []);
+  const [recentScans] = useState(new Set()); // Track recent scans
 
   const handleBarCodeScanned = async ({ data }) => {
     try {
+      if (scanned) return; // Prevent multiple scans
       setScanned(true);
       setLoading(true);
+
       const orderData = JSON.parse(data);
+      
+      // Check if this order was recently scanned
+      if (recentScans.has(orderData.orderID)) {
+        Alert.alert('Already Scanned', 'This order has already been scanned.');
+        setLoading(false);
+        setScanned(false);
+        return;
+      }
+
       const userId = await AsyncStorage.getItem('userId');
       
       // Save scan to history
@@ -42,6 +46,8 @@ export default function QRCodeScannerScreen({ navigation }) {
 
       if (response.ok) {
         const result = await response.json();
+        // Add to recent scans
+        recentScans.add(orderData.orderID);
         navigation.navigate('ScanDetails', { 
           scanId: result.scanId,
           orderData: orderData
@@ -53,7 +59,8 @@ export default function QRCodeScannerScreen({ navigation }) {
       Alert.alert('Error', 'Invalid QR code or failed to save scan');
     } finally {
       setLoading(false);
-      setScanned(false);
+      // Don't reset scanned state immediately to prevent double scans
+      setTimeout(() => setScanned(false), 1000);
     }
   };
 

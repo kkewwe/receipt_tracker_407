@@ -134,66 +134,77 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   statCard: {
-    backgroundColor: 'white',
+    backgroundColor: '#000',
     padding: 20,
     borderRadius: 15,
     width: '48%',
     alignItems: 'center',
+    // Shadow for iOS
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+    // Shadow for Android
     elevation: 3,
   },
   statNumber: {
     fontSize: 24,
     fontWeight: 'bold',
     marginVertical: 5,
+    color: '#fff',
   },
   statLabel: {
     fontSize: 14,
-    color: '#666',
+    color: '#fff',
+    opacity: 0.8,
   },
   monthlySection: {
     marginBottom: 20,
   },
   monthlyCard: {
-    backgroundColor: 'white',
+    backgroundColor: '#000',
     padding: 20,
     borderRadius: 15,
     alignItems: 'center',
+    // Shadow for iOS
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+    // Shadow for Android
     elevation: 3,
   },
   monthlyAmount: {
     fontSize: 32,
     fontWeight: 'bold',
     marginVertical: 10,
+    color: '#fff',
   },
   monthlyLabel: {
     fontSize: 14,
-    color: '#666',
+    color: '#fff',
+    opacity: 0.8,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 15,
+    color: '#000',
   },
   recentActivity: {
     marginBottom: 20,
   },
   scanCard: {
-    backgroundColor: 'white',
+    backgroundColor: '#fff',
     padding: 15,
     borderRadius: 10,
     marginBottom: 10,
+    // Shadow for iOS
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
+    // Shadow for Android
     elevation: 2,
   },
   scanHeader: {
@@ -204,6 +215,7 @@ const styles = StyleSheet.create({
   restaurantName: {
     fontSize: 16,
     fontWeight: '600',
+    color: '#000',
   },
   scanDate: {
     color: '#666',
@@ -211,10 +223,26 @@ const styles = StyleSheet.create({
   totalAmount: {
     fontSize: 16,
     fontWeight: '500',
+    color: '#000',
   },
   quickActions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 20,
-  }}
-)
+  },
+  actionButton: {
+    backgroundColor: '#000',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 15,
+    borderRadius: 10,
+    width: '48%',
+  },
+  actionButtonText: {
+    color: '#fff',
+    marginLeft: 10,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+});

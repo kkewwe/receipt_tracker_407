@@ -56,8 +56,6 @@ function ClientTabNavigator() {
 }
 
 function RestaurantTabNavigator({ route }) {
-  const { restaurantID } = route.params || {};
-
   return (
     <Tab.Navigator
       initialRouteName="Dashboard"
@@ -81,24 +79,28 @@ function RestaurantTabNavigator({ route }) {
       <Tab.Screen 
         name="Dashboard" 
         component={RestaurantDashboard}
-        initialParams={{ restaurantID }}
+        initialParams={{ restaurantID: route?.params?.restaurantID }}
       />
       <Tab.Screen 
         name="Create Order" 
         component={CreateOrderScreen}
-        initialParams={{ restaurantID }}
+        initialParams={{ restaurantID: route?.params?.restaurantID }}
       />
-      <Tab.Screen 
-        name="Settings" 
-        component={SettingsScreen}
-      />
+      <Tab.Screen name="Settings" component={SettingsScreen} />
     </Tab.Navigator>
   );
 }
 
 function MainApp({ route }) {
+  if (!route?.params) {
+    return null;
+  }
   const { isUserSide, restaurantID } = route.params;
-  return isUserSide ? <ClientTabNavigator /> : <RestaurantTabNavigator restaurantID={restaurantID} />;
+  return isUserSide ? (
+    <ClientTabNavigator />
+  ) : (
+    <RestaurantTabNavigator route={{ params: { restaurantID } }} />
+  );
 }
 
 export default function App() {
@@ -119,8 +121,24 @@ export default function App() {
         <Stack.Screen name="OrderDetails" component={OrderDetails} />
         
         {/* Client Screens */}
-        <Stack.Screen name="ScanDetails" component={ScanDetailsScreen} />
-        <Stack.Screen name="ScanHistory" component={ScanHistoryScreen} />
+        <Stack.Screen 
+          name="ScanDetails" 
+          component={ScanDetailsScreen} 
+          options={{
+            headerShown: true,
+            headerTitle: 'Order Details',
+            headerBackTitle: 'Back'
+          }}
+        />
+        <Stack.Screen 
+          name="ScanHistory" 
+          component={ScanHistoryScreen}
+          options={{
+            headerShown: true,
+            headerTitle: 'Order History',
+            headerBackTitle: 'Back'
+          }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
