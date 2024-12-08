@@ -128,7 +128,96 @@ export default function RestaurantDashboard({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
-  // ... existing styles remain the same ...
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+    padding: 20,
+  },
+  welcomeText: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  statCard: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 15,
+    width: '48%',
+    alignItems: 'center',
+    // Shadow for iOS
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    // Shadow for Android
+    elevation: 3,
+  },
+  statNumber: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginVertical: 5,
+    textAlign: 'center',
+  },
+  statLabel: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+  },
+  dishesSection: {
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 15,
+  },
+  dishCard: {
+    backgroundColor: 'white',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    // Shadow for iOS
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    // Shadow for Android
+    elevation: 2,
+  },
+  dishInfo: {
+    flex: 1,
+  },
+  dishName: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  dishOrders: {
+    color: '#666',
+  },
+  editButton: {
+    marginLeft: 10,
+  },
+  addButton: {
+    backgroundColor: '#000',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  addButtonText: {
+    color: 'white',
+    marginLeft: 10,
+    fontWeight: '600',
+  },
   ordersButton: {
     backgroundColor: '#007AFF',
     padding: 15,

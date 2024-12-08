@@ -167,8 +167,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#666',
   },
   buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
+    color: '#fff',
+    fontSize: 16,
   },
   registerText: {
     color: '#000',

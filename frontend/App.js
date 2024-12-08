@@ -19,6 +19,7 @@ import EditDish from './src/screens/EditDish';
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
+// Client Tab Navigator - Only client-specific screens
 function ClientTabNavigator() {
   return (
     <Tab.Navigator
@@ -47,7 +48,8 @@ function ClientTabNavigator() {
   );
 }
 
-function RestaurantTabNavigator({ initialParams }) {
+// Restaurant Tab Navigator - Only restaurant-specific screens
+function RestaurantTabNavigator() {
   return (
     <Tab.Navigator
       initialRouteName="Dashboard"
@@ -71,43 +73,40 @@ function RestaurantTabNavigator({ initialParams }) {
       <Tab.Screen 
         name="Dashboard" 
         component={RestaurantDashboard}
-        initialParams={initialParams}
       />
       <Tab.Screen 
         name="Create Order" 
         component={CreateOrderScreen}
-        initialParams={initialParams}
+        options={{
+          unmountOnBlur: true // This will unmount the screen when it's not focused
+        }}
       />
-      <Tab.Screen 
-        name="Settings" 
-        component={SettingsScreen}
-        initialParams={initialParams}
-      />
+      <Tab.Screen name="Settings" component={SettingsScreen} />
     </Tab.Navigator>
   );
 }
 
-
 function MainApp({ route }) {
-  const { isUserSide, restaurantID, userId } = route.params;
-  return isUserSide ? (
-    <ClientTabNavigator />
-  ) : (
-    <RestaurantTabNavigator initialParams={{ restaurantID, userId }} />
-  );
+  const { isUserSide, restaurantID } = route.params;
+  
+  if (isUserSide) {
+    return <ClientTabNavigator />;
+  }
+  
+  return <RestaurantTabNavigator />;
 }
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>{/* Remove space before this line */}
-        <Stack.Screen name="Home" component={HomeScreen} />{/* Remove space after this line */}
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
         <Stack.Screen name="MainApp" component={MainApp} />
         <Stack.Screen name="AddDish" component={AddDish} />
         <Stack.Screen name="EditDish" component={EditDish} />
-      </Stack.Navigator>{/* Remove space before this line */}
+      </Stack.Navigator>
     </NavigationContainer>
   );
 }

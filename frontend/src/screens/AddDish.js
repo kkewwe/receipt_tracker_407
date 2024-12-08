@@ -1,4 +1,3 @@
-// AddDish.js
 import { useState } from 'react';
 import { 
   StyleSheet, 
@@ -51,6 +50,13 @@ export default function AddDish({ navigation, route }) {
 
   return (
     <ScrollView style={styles.container}>
+      <TouchableOpacity 
+        style={styles.backButton}
+        onPress={() => navigation.goBack()}
+      >
+        <Text style={styles.backButtonText}>← Back</Text>
+      </TouchableOpacity>
+
       <Text style={styles.title}>Add New Dish</Text>
 
       <Text style={styles.label}>Name</Text>
@@ -94,3 +100,57 @@ export default function AddDish({ navigation, route }) {
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  backButton: {
+    marginBottom: 20,
+    marginTop: 20,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: '#007BFF',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 8,
+    color: '#333',
+    fontWeight: '500',
+  },
+  input: {
+    height: 40,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    marginBottom: 20,
+    paddingHorizontal: 12,
+    backgroundColor: '#f8f9fa',
+  },
+  textArea: {
+    height: 100,
+    textAlignVertical: 'top',
+    paddingTop: 12,
+  },
+  submitButton: {
+    backgroundColor: '#007BFF',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 10,
+    marginBottom: 30,
+  },
+  submitButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  }
+});

@@ -210,56 +210,69 @@ export default function RegisterScreen({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    padding: 20,
-  },
-  backButton: {
-    marginBottom: 20,
-  },
-  backButtonText: {
-    fontSize: 16,
-    color: '#007BFF',
-  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 40,
+    marginTop: 60,
   },
-  label: {
-    fontSize: 16,
-    marginBottom: 8,
+  container: {
+    flexGrow: 1,
+    backgroundColor: '#f5f5f5',
+    alignItems: 'center',
+    padding: 20,
+    paddingTop: 100,
   },
   input: {
-    height: 40,
+    width: '100%',
+    maxWidth: 300,
+    padding: 10,
     borderWidth: 1,
     borderColor: '#ccc',
-    marginBottom: 20,
-    paddingHorizontal: 10,
     borderRadius: 5,
+    marginBottom: 15,
+    backgroundColor: 'white',
   },
   textArea: {
     height: 80,
+    textAlignVertical: 'top',
   },
   button: {
-    backgroundColor: '#007BFF',
+    backgroundColor: '#000',
     padding: 15,
     borderRadius: 5,
+    width: '100%',
+    maxWidth: 300,
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 10,
   },
   buttonDisabled: {
-    backgroundColor: '#ccc',
+    backgroundColor: '#666',
   },
   buttonText: {
     color: '#fff',
     fontSize: 16,
   },
   loginText: {
-    fontSize: 16,
-    color: '#007BFF',
-    textAlign: 'center',
+    color: '#000',
+    marginTop: 20,
+    fontSize: 14,
+    textDecorationLine: 'underline',
   },
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    padding: 10,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: '#000',
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 8,
+    alignSelf: 'flex-start',
+    marginLeft: '10%', // To align with input field
+  }
 });
-
