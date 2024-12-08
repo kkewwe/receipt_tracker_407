@@ -91,6 +91,9 @@ export default function App() {
 
         {/* Main App after login */}
         <Stack.Screen name="MainApp" component={MainApp} />
+        <Stack.Screen name="AddDish" component={AddDish} />
+        <Stack.Screen name="EditDish" component={EditDish} />
+        <Stack.Screen name="OrderDetails" component={OrderDetails} />
       </Stack.Navigator>
     </NavigationContainer>
   );

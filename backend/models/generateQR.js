@@ -1,3 +1,4 @@
+// backend/models/generateQR.js
 const express = require('express');
 const QRCode = require('qrcode');
 const Dish = require('./dish');
@@ -35,11 +36,11 @@ router.post('/generate-qr', async (req, res) => {
 
     res.status(200).json({
       qrCode,
-      message: 'QR code generated successfully!',
+      message: 'QR code generated successfully!'
     });
   } catch (error) {
-    console.error('Backend Error:', error.message);
-    res.status(500).json({ message: 'Internal Server Error.' });
+    console.error('QR Generation error:', error);
+    res.status(500).json({ message: 'Failed to generate QR code', error: error.message });
   }
 });
 
