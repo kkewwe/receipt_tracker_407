@@ -21,45 +21,65 @@ export default function AddDish({ navigation, route }) {
     isAvailable: true
   });
 
-  const handleSubmit = async () => {
-    try {
-      if (!dishData.name || !dishData.cost) {
-        Alert.alert('Error', 'Name and price are required');
-        return;
-      }
-  
-      // Log the request data
-      console.log('Sending request with data:', {
-        ...dishData,
-        cost: parseFloat(dishData.cost),
-        restaurantID
-      });
-  
-      const response = await fetch(`${API_URL}/api/restaurant/dishes`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...dishData,
-          cost: parseFloat(dishData.cost),
-          restaurantID
-        }),
-      });
-  
-      // Get the actual error message from the server
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to add dish');
-      }
-  
-      Alert.alert('Success', 'Dish added successfully', [
-        { text: 'OK', onPress: () => navigation.goBack() }
-      ]);
-    } catch (error) {
-      console.error('Error adding dish:', error);
-      Alert.alert('Error', error.message || 'Failed to add dish');
+  // Updated handleSubmit function in AddDish.js
+const handleSubmit = async () => {
+  try {
+    if (!dishData.name || !dishData.cost) {
+      Alert.alert('Error', 'Name and price are required');
+      return;
     }
-  };
+
+    const requestData = {
+      ...dishData,
+      cost: parseFloat(dishData.cost),
+      restaurantID
+    };
+
+    console.log('Sending request with data:', requestData);
+
+    const response = await fetch(`${API_URL}/api/restaurant/dishes`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'  // Add this to ensure JSON response
+      },
+      body: JSON.stringify(requestData),
+    });
+
+    // First try to parse the response as JSON
+    let data;
+    try {
+      const textResponse = await response.text();
+      try {
+        data = JSON.parse(textResponse);
+      } catch (e) {
+        console.error('Server response:', textResponse);
+        throw new Error('Invalid server response');
+      }
+    } catch (e) {
+      throw new Error('Failed to parse server response');
+    }
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to add dish');
+    }
+
+    Alert.alert('Success', 'Dish added successfully', [
+      {
+        text: 'OK',
+        onPress: () => {
+          navigation.goBack();
+        }
+      }
+    ]);
+  } catch (error) {
+    console.error('Error adding dish:', error);
+    Alert.alert(
+      'Error',
+      error.message || 'Failed to add dish. Please try again.'
+    );
+  }
+};
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ alignItems: 'center' }}

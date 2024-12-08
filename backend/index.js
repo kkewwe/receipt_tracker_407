@@ -120,11 +120,36 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
+app.get('/api/restaurant/menu/:restaurantID', async (req, res) => {
+  try {
+    const { restaurantID } = req.params;
+    
+    // Add logging
+    console.log('Fetching menu for restaurant:', restaurantID);
+
+    const dishes = await Dish.find({ 
+      restaurantID,
+      isAvailable: true 
+    });
+
+    console.log('Found dishes:', dishes.length);
+    
+    res.json(dishes);
+  } catch (error) {
+    console.error('Error fetching menu:', error);
+    res.status(500).json({ 
+      message: 'Error fetching menu',
+      error: error.message 
+    });
+  }
+});
+
+// Add dish endpoint
 app.post('/api/restaurant/dishes', async (req, res) => {
   try {
     const { name, description, category, cost, restaurantID, isAvailable } = req.body;
 
-    // Validate required fields
+    // Add validation
     if (!name || !cost || !restaurantID) {
       return res.status(400).json({
         message: 'Name, price, and restaurant ID are required'
@@ -143,13 +168,12 @@ app.post('/api/restaurant/dishes', async (req, res) => {
     });
 
     await dish.save();
+    console.log('Dish saved:', dish);
 
-    // Send success response
     res.status(201).json({
       message: 'Dish created successfully',
       dish
     });
-
   } catch (error) {
     console.error('Error creating dish:', error);
     res.status(500).json({

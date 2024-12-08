@@ -48,7 +48,6 @@ function ClientTabNavigator() {
   );
 }
 
-// Restaurant Tab Navigator - Only restaurant-specific screens
 function RestaurantTabNavigator() {
   return (
     <Tab.Navigator
@@ -77,23 +76,59 @@ function RestaurantTabNavigator() {
       <Tab.Screen 
         name="Create Order" 
         component={CreateOrderScreen}
-        options={{
-          unmountOnBlur: true // This will unmount the screen when it's not focused
-        }}
       />
-      <Tab.Screen name="Settings" component={SettingsScreen} />
+      <Tab.Screen 
+        name="Settings" 
+        component={SettingsScreen}
+      />
     </Tab.Navigator>
   );
 }
 
 function MainApp({ route }) {
   const { isUserSide, restaurantID } = route.params;
-  
+
   if (isUserSide) {
     return <ClientTabNavigator />;
   }
-  
-  return <RestaurantTabNavigator />;
+
+  return (
+    <Tab.Navigator
+      initialRouteName="Dashboard"
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName;
+          if (route.name === 'Dashboard') {
+            iconName = focused ? 'home' : 'home-outline';
+          } else if (route.name === 'Create Order') {
+            iconName = focused ? 'add-circle' : 'add-circle-outline';
+          } else if (route.name === 'Settings') {
+            iconName = focused ? 'settings' : 'settings-outline';
+          }
+          return <Ionicons name={iconName} size={size} color={color} />;
+        },
+        tabBarActiveTintColor: 'black',
+        tabBarInactiveTintColor: 'gray',
+      })}
+    >
+      <Tab.Screen 
+        name="Dashboard" 
+        component={RestaurantDashboard}
+        initialParams={{ restaurantID }}
+      />
+      <Tab.Screen 
+        name="Create Order" 
+        component={CreateOrderScreen}
+        initialParams={{ restaurantID }}
+      />
+      <Tab.Screen 
+        name="Settings" 
+        component={SettingsScreen}
+        initialParams={{ restaurantID }}
+      />
+    </Tab.Navigator>
+  );
 }
 
 export default function App() {
