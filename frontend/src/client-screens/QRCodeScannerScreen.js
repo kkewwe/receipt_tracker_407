@@ -9,27 +9,37 @@ export default function QRCodeScannerScreen({ navigation }) {
   const [hasPermission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [recentScans] = useState(new Set()); // Track recent scans
+  const [processing, setProcessing] = useState(false); // Add this to prevent multiple processing
 
   const handleBarCodeScanned = async ({ data }) => {
+    // Prevent scanning while processing previous scan
+    if (scanned || processing) return;
+    
     try {
-      if (scanned) return; // Prevent multiple scans
       setScanned(true);
+      setProcessing(true);
       setLoading(true);
 
       const orderData = JSON.parse(data);
-      
-      // Check if this order was recently scanned
-      if (recentScans.has(orderData.orderID)) {
+      const userId = await AsyncStorage.getItem('userId');
+
+      // Check if this order was already scanned by this user
+      const checkResponse = await fetch(`${API_URL}/api/client/checkScan`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clientId: userId,
+          orderId: orderData.orderID
+        })
+      });
+
+      const checkResult = await checkResponse.json();
+      if (checkResult.exists) {
         Alert.alert('Already Scanned', 'This order has already been scanned.');
-        setLoading(false);
-        setScanned(false);
         return;
       }
 
-      const userId = await AsyncStorage.getItem('userId');
-      
-      // Save scan to history
+      // If not already scanned, proceed with saving
       const response = await fetch(`${API_URL}/api/client/scans`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -46,8 +56,6 @@ export default function QRCodeScannerScreen({ navigation }) {
 
       if (response.ok) {
         const result = await response.json();
-        // Add to recent scans
-        recentScans.add(orderData.orderID);
         navigation.navigate('ScanDetails', { 
           scanId: result.scanId,
           orderData: orderData
@@ -59,8 +67,9 @@ export default function QRCodeScannerScreen({ navigation }) {
       Alert.alert('Error', 'Invalid QR code or failed to save scan');
     } finally {
       setLoading(false);
-      // Don't reset scanned state immediately to prevent double scans
-      setTimeout(() => setScanned(false), 1000);
+      setProcessing(false);
+      // Add delay before allowing new scans
+      setTimeout(() => setScanned(false), 2000);
     }
   };
 

@@ -322,6 +322,22 @@ app.get('/api/client/scans/:clientId', async (req, res) => {
   }
 });
 
+app.post('/api/client/checkScan', async (req, res) => {
+  try {
+    const { clientId, orderId } = req.body;
+    
+    const existingScan = await ClientScan.findOne({
+      clientId,
+      orderId
+    });
+
+    res.json({ exists: !!existingScan });
+  } catch (error) {
+    console.error('Error checking scan:', error);
+    res.status(500).json({ message: 'Error checking scan' });
+  }
+});
+
 // Get client dashboard data
 app.get('/api/client/dashboard/:clientId', async (req, res) => {
   try {
