@@ -13,7 +13,7 @@ dotenv.config();
 const Client = require('./models/client');
 const Restaurant = require('./models/restaurant');
 const Dish = require('./models/dish');
-
+const Order = require('./models/order');
 const app = express();
 
 // Middleware
