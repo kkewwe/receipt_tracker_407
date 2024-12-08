@@ -6,15 +6,15 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const QRCode = require('qrcode');
-
-// Load environment variables
-dotenv.config();
-
+const ClientScan = require('./models/clientScan');
 const Client = require('./models/client');
 const Restaurant = require('./models/restaurant');
 const Dish = require('./models/dish');
 const Order = require('./models/order');
 const app = express();
+
+// Load environment variables
+dotenv.config();
 
 // Middleware
 app.use(cors({ origin: '*' }));
@@ -196,6 +196,14 @@ app.post('/api/restaurant/create-order', async (req, res) => {
 
     console.log('Creating order:', { restaurantID, dishes });
 
+    // Get restaurant details
+    const restaurant = await Restaurant.findOne({ restaurantID });
+    if (!restaurant) {
+      return res.status(404).json({
+        message: 'Restaurant not found'
+      });
+    }
+
     // Fetch dish details to calculate totals
     const dishDetails = await Dish.find({
       dishID: { $in: dishes.map(d => d.dishID) },
@@ -231,18 +239,21 @@ app.post('/api/restaurant/create-order', async (req, res) => {
       restaurantID,
       dishes: orderDishes,
       subtotal,
-      total: subtotal, // Add tax/discount logic if needed
+      total: subtotal,
       status: 'pending'
     });
 
     await order.save();
     console.log('Order saved:', order);
 
-    // Generate QR code
+    // Generate QR code with restaurant name
     const qrData = JSON.stringify({
       orderID: order.orderID,
       restaurantID,
-      total: order.total
+      restaurantName: restaurant.name,
+      dishes: orderDishes,
+      total: order.total,
+      date: new Date()
     });
 
     const qrCode = await QRCode.toDataURL(qrData);
@@ -262,8 +273,120 @@ app.post('/api/restaurant/create-order', async (req, res) => {
   }
 });
 
+// Save client scan
+app.post('/api/client/scans', async (req, res) => {
+  try {
+    const { clientId, orderId, restaurantId, restaurantName, total, items } = req.body;
+
+    const scan = new ClientScan({
+      scanId: `SCAN-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      clientId,
+      orderId,
+      restaurantId,
+      restaurantName,
+      total,
+      items,
+      date: new Date()
+    });
+
+    await scan.save();
+    console.log('Scan saved:', scan);
+
+    res.status(201).json({
+      message: 'Scan saved successfully',
+      scanId: scan.scanId
+    });
+  } catch (error) {
+    console.error('Error saving scan:', error);
+    res.status(500).json({
+      message: 'Failed to save scan',
+      error: error.message
+    });
+  }
+});
+
+// Get client's scan history
+app.get('/api/client/scans/:clientId', async (req, res) => {
+  try {
+    const scans = await ClientScan.find({ 
+      clientId: req.params.clientId 
+    }).sort({ date: -1 });
+
+    res.json(scans);
+  } catch (error) {
+    console.error('Error fetching scans:', error);
+    res.status(500).json({
+      message: 'Failed to fetch scan history',
+      error: error.message
+    });
+  }
+});
+
+// Get client dashboard data
+app.get('/api/client/dashboard/:clientId', async (req, res) => {
+  try {
+    const clientId = req.params.clientId;
+    
+    // Get all scans for the client
+    const allScans = await ClientScan.find({ clientId });
+    
+    // Calculate total spent
+    const totalSpent = allScans.reduce((sum, scan) => sum + scan.total, 0);
+    
+    // Calculate monthly stats
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthlyScans = allScans.filter(scan => 
+      new Date(scan.date) >= monthStart
+    );
+    const monthlySpent = monthlyScans.reduce((sum, scan) => sum + scan.total, 0);
+
+    // Get recent scans
+    const recentScans = await ClientScan.find({ clientId })
+      .sort({ date: -1 })
+      .limit(5);
+
+    res.json({
+      stats: {
+        totalScans: allScans.length,
+        totalSpent: totalSpent.toFixed(2),
+        monthlySpent: monthlySpent.toFixed(2),
+      },
+      recentScans
+    });
+  } catch (error) {
+    console.error('Error fetching dashboard data:', error);
+    res.status(500).json({
+      message: 'Failed to fetch dashboard data',
+      error: error.message
+    });
+  }
+});
+
+// Get specific scan details
+app.get('/api/client/scan/:scanId', async (req, res) => {
+  try {
+    const scan = await ClientScan.findOne({ 
+      scanId: req.params.scanId 
+    });
+
+    if (!scan) {
+      return res.status(404).json({ message: 'Scan not found' });
+    }
+
+    res.json(scan);
+  } catch (error) {
+    console.error('Error fetching scan:', error);
+    res.status(500).json({
+      message: 'Failed to fetch scan details',
+      error: error.message
+    });
+  }
+});
+
 // Start server
 const port = process.env.PORT || 5000;
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
+
