@@ -120,6 +120,45 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
+app.post('/api/restaurant/dishes', async (req, res) => {
+  try {
+    const { name, description, category, cost, restaurantID, isAvailable } = req.body;
+
+    // Validate required fields
+    if (!name || !cost || !restaurantID) {
+      return res.status(400).json({
+        message: 'Name, price, and restaurant ID are required'
+      });
+    }
+
+    // Create new dish
+    const dish = new Dish({
+      dishID: `DISH-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      name,
+      description,
+      category,
+      cost,
+      restaurantID,
+      isAvailable: isAvailable ?? true
+    });
+
+    await dish.save();
+
+    // Send success response
+    res.status(201).json({
+      message: 'Dish created successfully',
+      dish
+    });
+
+  } catch (error) {
+    console.error('Error creating dish:', error);
+    res.status(500).json({
+      message: 'Failed to create dish',
+      error: error.message
+    });
+  }
+});
+
 // Start server
 const port = process.env.PORT || 5000;
 app.listen(port, () => {

@@ -27,7 +27,14 @@ export default function AddDish({ navigation, route }) {
         Alert.alert('Error', 'Name and price are required');
         return;
       }
-
+  
+      // Log the request data
+      console.log('Sending request with data:', {
+        ...dishData,
+        cost: parseFloat(dishData.cost),
+        restaurantID
+      });
+  
       const response = await fetch(`${API_URL}/api/restaurant/dishes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -37,19 +44,26 @@ export default function AddDish({ navigation, route }) {
           restaurantID
         }),
       });
-
-      if (!response.ok) throw new Error('Failed to add dish');
-
+  
+      // Get the actual error message from the server
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to add dish');
+      }
+  
       Alert.alert('Success', 'Dish added successfully', [
         { text: 'OK', onPress: () => navigation.goBack() }
       ]);
     } catch (error) {
-      Alert.alert('Error', error.message);
+      console.error('Error adding dish:', error);
+      Alert.alert('Error', error.message || 'Failed to add dish');
     }
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={{ alignItems: 'center' }}
+    keyboardShouldPersistTaps="handled">
       <TouchableOpacity 
         style={styles.backButton}
         onPress={() => navigation.goBack()}
@@ -102,55 +116,76 @@ export default function AddDish({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#fff',
-  },
-  backButton: {
-    marginBottom: 20,
-    marginTop: 20,
-  },
-  backButtonText: {
-    fontSize: 16,
-    color: '#007BFF',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 16,
-    marginBottom: 8,
-    color: '#333',
-    fontWeight: '500',
-  },
-  input: {
-    height: 40,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    marginBottom: 20,
-    paddingHorizontal: 12,
-    backgroundColor: '#f8f9fa',
-  },
-  textArea: {
-    height: 100,
-    textAlignVertical: 'top',
-    paddingTop: 12,
-  },
-  submitButton: {
-    backgroundColor: '#007BFF',
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 30,
-  },
-  submitButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  }
-});
+    container: {
+      flex: 1,
+      backgroundColor: '#f5f5f5',
+      padding: 20,
+    },
+    backButton: {
+      position: 'absolute',
+      top: 50,
+      left: 20,
+      padding: 10,
+    },
+    backButtonText: {
+      fontSize: 16,
+      color: '#000',
+    },
+    title: {
+      fontSize: 28,
+      fontWeight: 'bold',
+      marginBottom: 40,
+      marginTop: 60,
+    },
+    label: {
+      fontSize: 16,
+      marginBottom: 8,
+      color: '#333',
+      fontWeight: '500',
+    },
+    input: {
+      width: '100%',
+      maxWidth: 300,
+      padding: 10,
+      borderWidth: 1,
+      borderColor: '#ccc',
+      borderRadius: 5,
+      marginBottom: 15,
+      backgroundColor: 'white',
+      alignSelf: 'center',
+      // Shadow for iOS
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.1,
+      shadowRadius: 2,
+      // Shadow for Android
+      elevation: 2,
+    },
+    textArea: {
+      height: 80,
+      textAlignVertical: 'top',
+    },
+    submitButton: {
+      backgroundColor: '#000',
+      padding: 15,
+      borderRadius: 5,
+      width: '100%',
+      maxWidth: 300,
+      alignItems: 'center',
+      alignSelf: 'center',
+      marginTop: 20,
+      marginBottom: 30,
+      // Shadow for iOS
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      // Shadow for Android
+      elevation: 3,
+    },
+    submitButtonText: {
+      color: '#fff',
+      fontSize: 16,
+      fontWeight: '600',
+    }
+  });
