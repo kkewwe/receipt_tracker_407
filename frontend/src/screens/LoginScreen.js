@@ -14,57 +14,67 @@ export default function LoginScreen({ navigation, route }) {
   // Destructure isUserSide from route.params
   const { isUserSide } = route.params;
   
-  const handleSignIn = async () => {
-    if (!username || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
-      return;
-    }
-  
-    setLoading(true);
-    try {
-      const requestBody = {
-        ...(isUserSide ? { name: username } : { username }),
-        password,
-        userType: isUserSide ? 'client' : 'restaurant'
-      };
-      console.log('Sending login request:', requestBody);
-  
-      const response = await fetch(`${API_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody),
-      });
-  
-      const data = await response.json();
-      console.log('Server response:', data);
-      
-      if (response.ok) {
-        await AsyncStorage.setItem('userToken', data.token);
-        await AsyncStorage.setItem('userId', data.userId);
-        await AsyncStorage.setItem('userType', data.userType);
-        
-        // Pass isUserSide to MainApp
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'MainApp', params: { isUserSide } }],
-        });
-      } else {
-        Alert.alert('Error', data.message || 'Login failed');
+  // LoginScreen.js - Update the handleSignIn function
+const handleSignIn = async () => {
+  if (!username || !password) {
+    Alert.alert('Error', 'Please fill in all fields');
+    return;
+  }
+
+  setLoading(true);
+  try {
+    const requestBody = {
+      ...(isUserSide ? { name: username } : { username }),
+      password,
+      userType: isUserSide ? 'client' : 'restaurant'
+    };
+    console.log('Sending login request:', requestBody);
+
+    const response = await fetch(`${API_URL}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody),
+    });
+
+    const data = await response.json();
+    console.log('Server response:', data);
+    
+    if (response.ok) {
+      await AsyncStorage.setItem('userToken', data.token);
+      await AsyncStorage.setItem('userId', data.userId);
+      await AsyncStorage.setItem('userType', data.userType);
+      if (!isUserSide) {
+        await AsyncStorage.setItem('restaurantID', data.restaurantID);
       }
-    } catch (error) {
-      console.error('Login error details:', {
-        message: error.message,
-        cause: error.cause,
-        stack: error.stack
+      
+      // Pass both isUserSide and restaurantID (if restaurant user)
+      navigation.reset({
+        index: 0,
+        routes: [{ 
+          name: 'MainApp', 
+          params: { 
+            isUserSide,
+            restaurantID: data.restaurantID // This will be undefined for client users
+          }
+        }],
       });
-      Alert.alert(
-        'Error', 
-        `Connection failed. Please check your internet connection and try again. (${error.message})`
-      );
-    } finally {
-      setLoading(false);
+    } else {
+      Alert.alert('Error', data.message || 'Login failed');
     }
-  };
+  } catch (error) {
+    console.error('Login error details:', {
+      message: error.message,
+      cause: error.cause,
+      stack: error.stack
+    });
+    Alert.alert(
+      'Error', 
+      `Connection failed. Please check your internet connection and try again. (${error.message})`
+    );
+  } finally {
+    setLoading(false);
+  }
+};
   
   return (
     <View style={styles.container}>

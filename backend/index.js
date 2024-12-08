@@ -105,11 +105,14 @@ app.post('/api/auth/login', async (req, res) => {
       { expiresIn: '1h' }
     );
 
+    // Add restaurantID to response for restaurant users
     res.json({
       message: 'Login successful',
       token,
       userId: user._id,
-      userType
+      userType,
+      // Include restaurantID only for restaurant users
+      ...(userType === 'restaurant' && { restaurantID: user.restaurantID })
     });
   } catch (error) {
     console.error('Login error:', error);

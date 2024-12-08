@@ -1,7 +1,7 @@
-// RestaurantDashboard.js
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const API_URL = 'https://receipt-tracker-407.onrender.com';
 
@@ -12,13 +12,39 @@ export default function RestaurantDashboard({ navigation, route }) {
     monthlyOrders: 0,
     monthlyRevenue: 0
   });
-
-  const { restaurantID } = route.params;
+  const [restaurantID, setRestaurantID] = useState(route.params?.restaurantID);
 
   useEffect(() => {
-    fetchDishes();
-    fetchStats();
+    const loadRestaurantID = async () => {
+      try {
+        // If no restaurantID in route params, try to get it from AsyncStorage
+        if (!restaurantID) {
+          const storedID = await AsyncStorage.getItem('restaurantID');
+          if (storedID) {
+            setRestaurantID(storedID);
+          } else {
+            Alert.alert('Error', 'Restaurant ID not found', [
+              {
+                text: 'OK',
+                onPress: () => navigation.replace('Login', { isUserSide: false })
+              }
+            ]);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading restaurantID:', error);
+      }
+    };
+
+    loadRestaurantID();
   }, []);
+
+  useEffect(() => {
+    if (restaurantID) {
+      fetchDishes();
+      fetchStats();
+    }
+  }, [restaurantID]);
 
   const fetchDishes = async () => {
     try {

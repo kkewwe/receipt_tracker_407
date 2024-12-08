@@ -1,11 +1,10 @@
-
-
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 
+// Import all screens
 import HomeScreen from './src/screens/HomeScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
@@ -14,6 +13,8 @@ import RestaurantDashboard from './src/screens/RestaurantDashboard';
 import CreateOrderScreen from './src/screens/CreateOrderScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import QRCodeScannerScreen from './src/screens/QRCodeScannerScreen';
+import AddDish from './src/screens/AddDish';
+import EditDish from './src/screens/EditDish';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -46,7 +47,7 @@ function ClientTabNavigator() {
   );
 }
 
-function RestaurantTabNavigator() {
+function RestaurantTabNavigator({ initialParams }) {
   return (
     <Tab.Navigator
       initialRouteName="Dashboard"
@@ -67,35 +68,46 @@ function RestaurantTabNavigator() {
         tabBarInactiveTintColor: 'gray',
       })}
     >
-      <Tab.Screen name="Dashboard" component={RestaurantDashboard} />
-      <Tab.Screen name="Create Order" component={CreateOrderScreen} />
-      <Tab.Screen name="Settings" component={SettingsScreen} />
+      <Tab.Screen 
+        name="Dashboard" 
+        component={RestaurantDashboard}
+        initialParams={initialParams}
+      />
+      <Tab.Screen 
+        name="Create Order" 
+        component={CreateOrderScreen}
+        initialParams={initialParams}
+      />
+      <Tab.Screen 
+        name="Settings" 
+        component={SettingsScreen}
+        initialParams={initialParams}
+      />
     </Tab.Navigator>
   );
 }
 
-// MainApp component to switch between ClientTabNavigator and RestaurantTabNavigator
+
 function MainApp({ route }) {
-  const { isUserSide } = route.params;
-  return isUserSide ? <ClientTabNavigator /> : <RestaurantTabNavigator />;
+  const { isUserSide, restaurantID, userId } = route.params;
+  return isUserSide ? (
+    <ClientTabNavigator />
+  ) : (
+    <RestaurantTabNavigator initialParams={{ restaurantID, userId }} />
+  );
 }
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {/* Authentication Screens */}
-        <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Navigator screenOptions={{ headerShown: false }}>{/* Remove space before this line */}
+        <Stack.Screen name="Home" component={HomeScreen} />{/* Remove space after this line */}
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
-
-        {/* Main App after login */}
         <Stack.Screen name="MainApp" component={MainApp} />
         <Stack.Screen name="AddDish" component={AddDish} />
         <Stack.Screen name="EditDish" component={EditDish} />
-        <Stack.Screen name="OrderDetails" component={OrderDetails} />
-      </Stack.Navigator>
+      </Stack.Navigator>{/* Remove space before this line */}
     </NavigationContainer>
   );
 }
-
