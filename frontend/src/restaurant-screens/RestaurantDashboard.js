@@ -137,6 +137,7 @@ const styles = StyleSheet.create({
   welcomeText: {
     fontSize: 28,
     fontWeight: 'bold',
+    marginTop: 40,
     marginBottom: 20,
   },
   statsContainer: {
