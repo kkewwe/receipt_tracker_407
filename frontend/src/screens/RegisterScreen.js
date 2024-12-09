@@ -97,7 +97,7 @@ export default function RegisterScreen({ navigation, route }) {
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView style={{ flex: 1, overflow: 'auto' }} contentContainerStyle={styles.container}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.navigate('Home')}
@@ -105,7 +105,9 @@ export default function RegisterScreen({ navigation, route }) {
           <Text style={styles.backButtonText}>← Back</Text>
         </TouchableOpacity>
 
-        <Text style={styles.title}>{isUserSide ? 'User Sign Up' : 'Restaurant Sign Up'}</Text>
+        <Text style={styles.title}>
+          {isUserSide ? 'User Sign Up' : 'Restaurant Sign Up'}
+        </Text>
 
         <Text style={styles.label}>Username:</Text>
         <TextInput
@@ -217,11 +219,9 @@ const styles = StyleSheet.create({
     marginTop: 60,
   },
   container: {
-    flexGrow: 1,
-    backgroundColor: '#f5f5f5',
     alignItems: 'center',
     padding: 20,
-    paddingTop: 100,
+    paddingBottom: 100,
   },
   input: {
     width: '100%',
@@ -273,6 +273,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 8,
     alignSelf: 'flex-start',
-    marginLeft: '10%', // To align with input field
-  }
+    marginLeft: '10%',
+  },
 });
