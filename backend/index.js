@@ -187,32 +187,31 @@ app.post('/api/restaurant/create-order', async (req, res) => {
   try {
     const { restaurantID, dishes } = req.body;
 
-    // Validate input
     if (!restaurantID || !dishes || !dishes.length) {
       return res.status(400).json({
-        message: 'Restaurant ID and dishes are required'
+        message: 'Restaurant ID and dishes are required',
       });
     }
 
     console.log('Creating order:', { restaurantID, dishes });
 
-    // Get restaurant details
+    // Fetch restaurant details
     const restaurant = await Restaurant.findOne({ restaurantID });
     if (!restaurant) {
       return res.status(404).json({
-        message: 'Restaurant not found'
+        message: 'Restaurant not found',
       });
     }
 
     // Fetch dish details to calculate totals
     const dishDetails = await Dish.find({
       dishID: { $in: dishes.map(d => d.dishID) },
-      restaurantID
+      restaurantID,
     });
 
     if (!dishDetails.length) {
       return res.status(404).json({
-        message: 'No valid dishes found'
+        message: 'No valid dishes found',
       });
     }
 
@@ -225,22 +224,24 @@ app.post('/api/restaurant/create-order', async (req, res) => {
       dishID: dish.dishID,
       name: dishMap[dish.dishID].name,
       quantity: dish.quantity,
-      price: dishMap[dish.dishID].cost
+      price: dishMap[dish.dishID].cost,
     }));
 
     const subtotal = orderDishes.reduce(
-      (sum, dish) => sum + (dish.price * dish.quantity),
+      (sum, dish) => sum + dish.price * dish.quantity,
       0
     );
 
     // Create new order
     const order = new Order({
-      orderID: `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      orderID: `ORDER-${Date.now()}-${Math.random()
+        .toString(36)
+        .substr(2, 9)}`,
       restaurantID,
       dishes: orderDishes,
       subtotal,
       total: subtotal,
-      status: 'pending'
+      status: 'pending',
     });
 
     await order.save();
@@ -253,25 +254,30 @@ app.post('/api/restaurant/create-order', async (req, res) => {
       restaurantName: restaurant.name,
       dishes: orderDishes,
       total: order.total,
-      date: new Date()
+      date: new Date(),
     });
 
     const qrCode = await QRCode.toDataURL(qrData);
 
+    restaurant.monthlyOrders += 1;
+    restaurant.monthlyRevenue += subtotal;
+
+    await restaurant.save();
+
     res.status(201).json({
       message: 'Order created successfully',
       order,
-      qrCode
+      qrCode,
     });
-
   } catch (error) {
     console.error('Error creating order:', error);
     res.status(500).json({
       message: 'Failed to create order',
-      error: error.message
+      error: error.message,
     });
   }
 });
+
 
 // Save client scan
 app.post('/api/client/scans', async (req, res) => {
@@ -399,6 +405,72 @@ app.get('/api/client/scan/:scanId', async (req, res) => {
     });
   }
 });
+app.post('/api/auth/edit-password', async (req, res) => {
+  try {
+    const { userId, currentPassword, newPassword } = req.body;
+
+    if (!userId || !currentPassword || !newPassword) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    // Determine the user type
+    const user = await Client.findById(userId) || await Restaurant.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Verify current password
+    const isValidPassword = await bcrypt.compare(currentPassword, user.password);
+    if (!isValidPassword) {
+      return res.status(401).json({ message: 'Incorrect current password' });
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+    // Update password in the database
+    user.password = hashedPassword;
+    await user.save();
+
+    res.status(200).json({ message: 'Password updated successfully' });
+  } catch (error) {
+    console.error('Error updating password:', error);
+    res.status(500).json({ message: 'Failed to update password', error: error.message });
+  }
+});
+
+
+// delete profile
+app.post('/api/auth/delete-profile', async (req, res) => {
+  try {
+    const { userId, password } = req.body;
+
+    if (!userId || !password) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    // Determine the user type (you may need to send `userType` from the frontend)
+    const user = await Client.findById(userId) || await Restaurant.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Verify the password
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
+      return res.status(401).json({ message: 'Incorrect password' });
+    }
+
+    // Delete the user
+    await user.remove();
+
+    res.json({ message: 'Profile deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting profile:', error);
+    res.status(500).json({ message: 'Failed to delete profile', error: error.message });
+  }
+});
+
 
 // Start server
 const port = process.env.PORT || 5000;

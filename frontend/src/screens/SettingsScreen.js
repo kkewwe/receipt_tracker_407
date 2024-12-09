@@ -1,62 +1,246 @@
-import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Alert,
+  ScrollView,
+} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const API_URL = 'https://receipt-tracker-407.onrender.com';
 
 export default function SettingsScreen({ navigation }) {
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [retypeNewPassword, setRetypeNewPassword] = useState('');
+  const [deletePassword, setDeletePassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleEditPassword = async () => {
+    if (!currentPassword || !newPassword || !retypeNewPassword) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
+    if (newPassword !== retypeNewPassword) {
+      Alert.alert('Error', 'New passwords do not match');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const userId = await AsyncStorage.getItem('userId');
+      const response = await fetch(`${API_URL}/api/auth/edit-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, currentPassword, newPassword }),
+      });
+
+      if (response.ok) {
+        Alert.alert('Success', 'Password updated successfully');
+        setCurrentPassword('');
+        setNewPassword('');
+        setRetypeNewPassword('');
+      } else {
+        const data = await response.json();
+        Alert.alert('Error', data.message || 'Failed to update password');
+      }
+    } catch (error) {
+      console.error('Edit Password Error:', error);
+      Alert.alert('Error', 'Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteProfile = async () => {
+    if (!deletePassword) {
+      Alert.alert('Error', 'Please enter your password to confirm');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const userId = await AsyncStorage.getItem('userId');
+      const response = await fetch(`${API_URL}/api/auth/delete-profile`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: userId, password: deletePassword }),
+      });
+
+      if (response.ok) {
+        Alert.alert('Success', 'Profile deleted successfully', [
+          { text: 'OK', onPress: () => navigation.reset({ index: 0, routes: [{ name: 'Home' }] }) },
+        ]);
+      } else {
+        const data = await response.json();
+        Alert.alert('Error', data.message || 'Failed to delete profile');
+      }
+    } catch (error) {
+      console.error('Delete Profile Error:', error);
+      Alert.alert('Error', 'Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    Alert.alert('Log Out', 'Are you sure you want to log out?', [
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+      {
+        text: 'Log Out',
+        style: 'destructive',
+        onPress: () => navigation.reset({ index: 0, routes: [{ name: 'Home' }] }),
+      },
+    ]);
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Settings</Text>
-      <TouchableOpacity 
-        style={styles.settingItem}
-        onPress={() => {/* Handle profile edit */}}
-      >
-        <Text style={styles.settingText}>Edit Profile</Text>
-      </TouchableOpacity>
-      <TouchableOpacity 
-        style={styles.settingItem}
-        onPress={() => {/* Handle notifications */}}
-      >
-        <Text style={styles.settingText}>Notifications</Text>
-      </TouchableOpacity>
-      <TouchableOpacity 
-        style={[styles.settingItem, styles.logoutButton]}
-        onPress={() => navigation.reset({
-          index: 0,
-          routes: [{ name: 'Home' }],
-        })}
-      >
-        <Text style={[styles.settingText, styles.logoutText]}>Logout</Text>
-      </TouchableOpacity>
-    </View>
+    <KeyboardAvoidingView>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>Settings</Text>
+
+        <View style={styles.divider} />
+
+        {/* Edit Password Section */}
+        <Text style={styles.sectionTitle}>Edit Password</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Current Password"
+          value={currentPassword}
+          onChangeText={setCurrentPassword}
+          secureTextEntry
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="New Password"
+          value={newPassword}
+          onChangeText={setNewPassword}
+          secureTextEntry
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Retype New Password"
+          value={retypeNewPassword}
+          onChangeText={setRetypeNewPassword}
+          secureTextEntry
+        />
+        <TouchableOpacity
+          style={[styles.button, loading && styles.buttonDisabled]}
+          onPress={handleEditPassword}
+          disabled={loading}
+        >
+          <Text style={styles.buttonText}>
+            {loading ? 'Updating...' : 'Update Password'}
+          </Text>
+        </TouchableOpacity>
+
+        <View style={styles.divider} />
+
+        {/* Delete Profile Section */}
+        <Text style={styles.sectionTitle}>Delete Profile</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter Password to Confirm"
+          value={deletePassword}
+          onChangeText={setDeletePassword}
+          secureTextEntry
+        />
+        <TouchableOpacity
+          style={[styles.button, styles.deleteButton, loading && styles.buttonDisabled]}
+          onPress={handleDeleteProfile}
+          disabled={loading}
+        >
+          <Text style={styles.buttonText}>
+            {loading ? 'Deleting...' : 'Delete Profile'}
+          </Text>
+        </TouchableOpacity>
+
+        <View style={styles.divider} />
+
+        {/* Log Out Button */}
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Text style={styles.logoutText}>Log Out</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: '#f5f5f5',
     padding: 20,
+    alignItems: 'center',
   },
   title: {
-    fontSize: 24,
+    fontSize: 30,
     fontWeight: 'bold',
-    marginBottom: 30,
+    marginTop: 40,
+    marginBottom: 0,
   },
-  settingItem: {
-    backgroundColor: 'white',
-    padding: 15,
-    borderRadius: 10,
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    alignSelf: 'flex-start',
+    marginTop: 20,
     marginBottom: 10,
   },
-  settingText: {
+  input: {
+    width: '100%',
+    maxWidth: 300,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    marginBottom: 15,
+    backgroundColor: 'white',
+  },
+  button: {
+    backgroundColor: '#000',
+    padding: 15,
+    borderRadius: 5,
+    width: '100%',
+    maxWidth: 300,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  deleteButton: {
+    backgroundColor: '#ff4444',
+  },
+  buttonDisabled: {
+    backgroundColor: '#666',
+  },
+  buttonText: {
+    color: '#fff',
     fontSize: 16,
   },
   logoutButton: {
-    backgroundColor: '#ff4444',
+    backgroundColor: '#008000',
+    padding: 15,
+    borderRadius: 5,
+    width: '100%',
+    maxWidth: 300,
+    alignItems: 'center',
     marginTop: 20,
   },
   logoutText: {
-    color: 'white',
-    textAlign: 'center',
+    color: '#fff',
+    fontSize: 16,
     fontWeight: 'bold',
+  },
+  divider: {
+    height: 2,
+    backgroundColor: '#ccc',
+    alignSelf: 'stretch', 
+    marginVertical: 20,
   },
 });

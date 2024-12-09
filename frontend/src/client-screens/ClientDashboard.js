@@ -79,22 +79,6 @@ export default function ClientDashboard({ navigation }) {
         </View>
       </View>
 
-      {/* Monthly Spending */}
-      <View style={styles.monthlySection}>
-        <Text style={styles.sectionTitle}>This Month</Text>
-        <View style={styles.monthlyCard}>
-          <MaterialCommunityIcons name="calendar-month" size={24} color="#fff" />
-          <Text style={styles.monthlyAmount}>${stats.monthlySpent}</Text>
-          <Text style={styles.monthlyLabel}>Spent this month</Text>
-        </View>
-      </View>
-
-      {/* Recent Activity */}
-      <View style={styles.recentActivity}>
-        <Text style={styles.sectionTitle}>Recent Activity</Text>
-        {recentScans.map(renderRecentScan)}
-      </View>
-
       {/* Quick Actions */}
       <View style={styles.quickActions}>
         <TouchableOpacity
@@ -111,6 +95,22 @@ export default function ClientDashboard({ navigation }) {
           <MaterialCommunityIcons name="history" size={24} color="white" />
           <Text style={styles.actionButtonText}>View History</Text>
         </TouchableOpacity>
+      </View>
+
+      {/* Monthly Spending */}
+      <View style={styles.monthlySection}>
+        <Text style={styles.sectionTitle}>This Month</Text>
+        <View style={styles.monthlyCard}>
+          <MaterialCommunityIcons name="calendar-month" size={24} color="#fff" />
+          <Text style={styles.monthlyAmount}>${stats.monthlySpent}</Text>
+          <Text style={styles.monthlyLabel}>Spent this month</Text>
+        </View>
+      </View>
+
+      {/* Recent Activity */}
+      <View style={styles.recentActivity}>
+        <Text style={styles.sectionTitle}>Recent Activity</Text>
+        {recentScans.map(renderRecentScan)}
       </View>
     </ScrollView>
   );
@@ -130,6 +130,7 @@ const styles = StyleSheet.create({
   welcomeText: {
     fontSize: 30,
     fontWeight: 'bold',
+    marginTop: 40, 
     marginBottom: 20,
     color: '#000',
   },
@@ -181,7 +182,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 15,
+    marginBottom: 25,
     color: '#000',
   },
   recentActivity: {
