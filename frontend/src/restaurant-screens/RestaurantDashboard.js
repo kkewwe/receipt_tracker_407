@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 
 const API_URL = 'https://receipt-tracker-407.onrender.com';
 
@@ -10,14 +11,14 @@ export default function RestaurantDashboard({ navigation, route }) {
   const [stats, setStats] = useState({
     totalOrders: 0,
     monthlyOrders: 0,
-    monthlyRevenue: 0
+    monthlyRevenue: 0,
   });
   const [restaurantID, setRestaurantID] = useState(route.params?.restaurantID);
 
+  // Load restaurantID on component mount
   useEffect(() => {
     const loadRestaurantID = async () => {
       try {
-        // If no restaurantID in route params, try to get it from AsyncStorage
         if (!restaurantID) {
           const storedID = await AsyncStorage.getItem('restaurantID');
           if (storedID) {
@@ -26,8 +27,8 @@ export default function RestaurantDashboard({ navigation, route }) {
             Alert.alert('Error', 'Restaurant ID not found', [
               {
                 text: 'OK',
-                onPress: () => navigation.replace('Login', { isUserSide: false })
-              }
+                onPress: () => navigation.replace('Login', { isUserSide: false }),
+              },
             ]);
           }
         }
@@ -39,12 +40,15 @@ export default function RestaurantDashboard({ navigation, route }) {
     loadRestaurantID();
   }, []);
 
-  useEffect(() => {
-    if (restaurantID) {
-      fetchDishes();
-      fetchStats();
-    }
-  }, [restaurantID]);
+  // Fetch stats and dishes when the dashboard gains focus
+  useFocusEffect(
+    React.useCallback(() => {
+      if (restaurantID) {
+        fetchStats();
+        fetchDishes();
+      }
+    }, [restaurantID])
+  );
 
   const fetchDishes = async () => {
     try {
@@ -109,15 +113,12 @@ export default function RestaurantDashboard({ navigation, route }) {
               <Text style={styles.dishPrice}>${dish.cost}</Text>
               <Text style={styles.dishCategory}>{dish.category}</Text>
             </View>
-            <TouchableOpacity 
-              style={styles.editButton}
-              onPress={() => handleEditDish(dish)}
-            >
+            <TouchableOpacity style={styles.editButton} onPress={() => handleEditDish(dish)}>
               <MaterialCommunityIcons name="pencil" size={20} color="#000" />
             </TouchableOpacity>
           </View>
         ))}
-        
+
         <TouchableOpacity style={styles.addButton} onPress={handleAddDish}>
           <MaterialCommunityIcons name="plus-circle" size={24} color="white" />
           <Text style={styles.addButtonText}>Add New Dish</Text>
