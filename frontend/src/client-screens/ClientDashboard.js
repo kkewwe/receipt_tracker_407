@@ -27,7 +27,7 @@ export default function ClientDashboard({ navigation }) {
       const userId = await AsyncStorage.getItem('userId');
       const response = await fetch(`${API_URL}/api/client/dashboard/${userId}`);
       const data = await response.json();
-      
+
       setStats(data.stats);
       setRecentScans(data.recentScans);
     } catch (error) {
@@ -38,8 +38,8 @@ export default function ClientDashboard({ navigation }) {
   };
 
   const renderRecentScan = (scan) => (
-    <TouchableOpacity 
-      key={scan.scanId} 
+    <TouchableOpacity
+      key={scan.scanId}
       style={styles.scanCard}
       onPress={() => navigation.navigate('ScanDetails', { orderData: scan })}
     >
@@ -49,7 +49,7 @@ export default function ClientDashboard({ navigation }) {
           {new Date(scan.date).toLocaleDateString()}
         </Text>
       </View>
-      <Text style={styles.totalAmount}>${scan.total.toFixed(2)}</Text>
+      <Text style={styles.totalAmount}>-${scan.total.toFixed(2)}</Text>
     </TouchableOpacity>
   );
 
@@ -64,16 +64,16 @@ export default function ClientDashboard({ navigation }) {
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.welcomeText}>Welcome back!</Text>
-      
+
       {/* Stats Cards */}
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
-          <MaterialCommunityIcons name="qrcode-scan" size={24} color="#000" />
+          <MaterialCommunityIcons name="qrcode-scan" size={24} color="#fff" />
           <Text style={styles.statNumber}>{stats.totalScans}</Text>
           <Text style={styles.statLabel}>Total Orders</Text>
         </View>
         <View style={styles.statCard}>
-          <MaterialCommunityIcons name="cash" size={24} color="#000" />
+          <MaterialCommunityIcons name="cash" size={24} color="#fff" />
           <Text style={styles.statNumber}>${stats.totalSpent}</Text>
           <Text style={styles.statLabel}>Total Spent</Text>
         </View>
@@ -83,7 +83,7 @@ export default function ClientDashboard({ navigation }) {
       <View style={styles.monthlySection}>
         <Text style={styles.sectionTitle}>This Month</Text>
         <View style={styles.monthlyCard}>
-          <MaterialCommunityIcons name="calendar-month" size={24} color="#000" />
+          <MaterialCommunityIcons name="calendar-month" size={24} color="#fff" />
           <Text style={styles.monthlyAmount}>${stats.monthlySpent}</Text>
           <Text style={styles.monthlyLabel}>Spent this month</Text>
         </View>
@@ -97,14 +97,14 @@ export default function ClientDashboard({ navigation }) {
 
       {/* Quick Actions */}
       <View style={styles.quickActions}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.actionButton}
           onPress={() => navigation.navigate('QR Scan')}
         >
           <MaterialCommunityIcons name="qrcode-scan" size={24} color="white" />
           <Text style={styles.actionButtonText}>Scan Order</Text>
         </TouchableOpacity>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.actionButton}
           onPress={() => navigation.navigate('ScanHistory')}
         >
@@ -119,7 +119,7 @@ export default function ClientDashboard({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f9f9f9',
     padding: 20,
   },
   loadingContainer: {
@@ -128,9 +128,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   welcomeText: {
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: 'bold',
     marginBottom: 20,
+    color: '#000',
   },
   statsContainer: {
     flexDirection: 'row',
@@ -143,16 +144,10 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     width: '48%',
     alignItems: 'center',
-    // Shadow for iOS
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    // Shadow for Android
-    elevation: 3,
+    elevation: 5,
   },
   statNumber: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: 'bold',
     marginVertical: 5,
     color: '#fff',
@@ -160,26 +155,20 @@ const styles = StyleSheet.create({
   statLabel: {
     fontSize: 14,
     color: '#fff',
-    opacity: 0.8,
+    opacity: 0.7,
   },
   monthlySection: {
-    marginBottom: 20,
+    marginBottom: 25,
   },
   monthlyCard: {
     backgroundColor: '#000',
-    padding: 20,
+    padding: 25,
     borderRadius: 15,
     alignItems: 'center',
-    // Shadow for iOS
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    // Shadow for Android
-    elevation: 3,
+    elevation: 5,
   },
   monthlyAmount: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: 'bold',
     marginVertical: 10,
     color: '#fff',
@@ -187,10 +176,10 @@ const styles = StyleSheet.create({
   monthlyLabel: {
     fontSize: 14,
     color: '#fff',
-    opacity: 0.8,
+    opacity: 0.7,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 15,
     color: '#000',
@@ -203,13 +192,9 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     marginBottom: 10,
-    // Shadow for iOS
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    // Shadow for Android
-    elevation: 2,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#ddd',
   },
   scanHeader: {
     flexDirection: 'row',
@@ -218,7 +203,7 @@ const styles = StyleSheet.create({
   },
   restaurantName: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: 'bold',
     color: '#000',
   },
   scanDate: {
@@ -226,8 +211,8 @@ const styles = StyleSheet.create({
   },
   totalAmount: {
     fontSize: 16,
-    fontWeight: '500',
-    color: '#000',
+    fontWeight: 'bold',
+    color: '#ff0000',
   },
   quickActions: {
     flexDirection: 'row',
@@ -242,6 +227,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     width: '48%',
+    elevation: 5,
   },
   actionButtonText: {
     color: '#fff',
