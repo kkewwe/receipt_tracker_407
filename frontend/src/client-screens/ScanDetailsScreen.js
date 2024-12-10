@@ -10,7 +10,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function ScanDetailsScreen({ route, navigation }) {
   const orderData = route.params?.orderData || {};
-  const dishes = orderData.dishes || [];
+  const dishes = orderData.items || [];
 
   return (
     <ScrollView style={styles.container}>

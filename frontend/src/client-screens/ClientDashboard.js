@@ -27,7 +27,6 @@ export default function ClientDashboard({ navigation }) {
       const userId = await AsyncStorage.getItem('userId');
       const response = await fetch(`${API_URL}/api/client/dashboard/${userId}`);
       const data = await response.json();
-
       setStats(data.stats);
       setRecentScans(data.recentScans);
     } catch (error) {
@@ -41,7 +40,9 @@ export default function ClientDashboard({ navigation }) {
     <TouchableOpacity
       key={scan.scanId}
       style={styles.scanCard}
-      onPress={() => navigation.navigate('ScanDetails', { orderData: scan })}
+      onPress={() => {
+        navigation.navigate('ScanDetails', { orderData: scan })
+      }}
     >
       <View style={styles.scanHeader}>
         <Text style={styles.restaurantName}>{scan.restaurantName}</Text>
