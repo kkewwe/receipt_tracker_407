@@ -339,7 +339,6 @@ app.patch('/api/restaurant/order/:orderID/status', async (req, res) => {
   }
 });
 
-// Get restaurant statistics
 app.get('/api/restaurant/:restaurantID/stats', async (req, res) => {
   try {
     const { restaurantID } = req.params;
@@ -349,10 +348,23 @@ app.get('/api/restaurant/:restaurantID/stats', async (req, res) => {
       return res.status(404).json({ message: 'Restaurant not found' });
     }
 
-    // Access the nested stats object
+    // Get all orders for this restaurant
+    const allOrders = await Order.find({ restaurantID });
+    
+    // Calculate total revenue from all orders
+    const totalRevenue = allOrders.reduce((sum, order) => sum + order.total, 0);
+
+    // Get monthly orders and revenue
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthlyOrders = allOrders.filter(order => new Date(order.createdAt) >= monthStart);
+    const monthlyRevenue = monthlyOrders.reduce((sum, order) => sum + order.total, 0);
+
     res.json({
-      monthlyOrders: restaurant.stats.monthlyOrders || 0,
-      monthlyRevenue: restaurant.stats.monthlyRevenue || 0
+      monthlyOrders: monthlyOrders.length,
+      monthlyRevenue: monthlyRevenue.toFixed(2),
+      totalOrders: allOrders.length,
+      totalRevenue: totalRevenue.toFixed(2)
     });
   } catch (error) {
     console.error('Error fetching restaurant statistics:', error);

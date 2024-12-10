@@ -3,6 +3,10 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import { 
+  TouchableOpacity, 
+  Text 
+} from 'react-native';
 
 // Import screens by folder structure
 // Client Screens
@@ -111,7 +115,23 @@ export default function App() {
         {/* Restaurant Screens */}
           <Stack.Screen name="AddDish" component={AddDish} />
           <Stack.Screen name="EditDish" component={EditDish} />
-          <Stack.Screen name="OrderDetails" component={OrderDetails} />
+          <Stack.Screen 
+            name="OrderDetails" 
+            component={OrderDetails}
+            options={({ navigation }) => ({  // Add navigation as a prop
+              headerShown: true,
+              headerTitle: 'Order Details',
+              headerBackTitle: 'Back',
+              headerLeft: () => (
+                <TouchableOpacity
+                  onPress={() => navigation.goBack()}
+                  style={{ marginLeft: 10 }}
+                >
+                  <Text style={{ color: '#007AFF' }}>Back</Text>
+                </TouchableOpacity>
+              ),
+            })}
+          />
           <Stack.Screen 
             name="OrdersList" 
             component={OrdersListScreen}

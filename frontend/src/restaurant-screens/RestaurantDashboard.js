@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
@@ -10,6 +10,7 @@ export default function RestaurantDashboard({ navigation, route }) {
   const [dishes, setDishes] = useState([]);
   const [stats, setStats] = useState({
     totalOrders: 0,
+    totalRevenue: 0,
     monthlyOrders: 0,
     monthlyRevenue: 0,
   });
@@ -56,7 +57,7 @@ export default function RestaurantDashboard({ navigation, route }) {
       const data = await response.json();
       setDishes(data);
     } catch (error) {
-      Alert.alert('Error', 'Failed to fetch menu items');
+      console.error('Error fetching menu:', error);
     }
   };
 
@@ -66,7 +67,7 @@ export default function RestaurantDashboard({ navigation, route }) {
       const data = await response.json();
       setStats(data);
     } catch (error) {
-      Alert.alert('Error', 'Failed to fetch statistics');
+      console.error('Error fetching statistics:', error);
     }
   };
 
@@ -86,16 +87,37 @@ export default function RestaurantDashboard({ navigation, route }) {
     <ScrollView style={styles.container}>
       <Text style={styles.welcomeText}>Restaurant Dashboard</Text>
 
-      <View style={styles.statsContainer}>
-        <View style={styles.statCard}>
-          <MaterialCommunityIcons name="receipt" size={24} color="#000" />
-          <Text style={styles.statNumber}>{stats.monthlyOrders}</Text>
-          <Text style={styles.statLabel}>Monthly Orders</Text>
+      {/* Monthly Stats */}
+      <View style={styles.statsSection}>
+        <Text style={styles.sectionTitle}>This Month</Text>
+        <View style={styles.statsContainer}>
+          <View style={styles.statCard}>
+            <MaterialCommunityIcons name="receipt" size={24} color="#000" />
+            <Text style={styles.statNumber}>{stats.monthlyOrders}</Text>
+            <Text style={styles.statLabel}>Monthly Orders</Text>
+          </View>
+          <View style={styles.statCard}>
+            <MaterialCommunityIcons name="cash" size={24} color="#000" />
+            <Text style={styles.statNumber}>${stats.monthlyRevenue}</Text>
+            <Text style={styles.statLabel}>Monthly Revenue</Text>
+          </View>
         </View>
-        <View style={styles.statCard}>
-          <MaterialCommunityIcons name="cash" size={24} color="#000" />
-          <Text style={styles.statNumber}>${stats.monthlyRevenue}</Text>
-          <Text style={styles.statLabel}>Monthly Revenue</Text>
+      </View>
+
+      {/* Overall Stats */}
+      <View style={styles.statsSection}>
+        <Text style={styles.sectionTitle}>Overall Stats</Text>
+        <View style={styles.statsContainer}>
+          <View style={styles.statCard}>
+            <MaterialCommunityIcons name="receipt" size={24} color="#000" />
+            <Text style={styles.statNumber}>{stats.totalOrders}</Text>
+            <Text style={styles.statLabel}>Total Orders</Text>
+          </View>
+          <View style={styles.statCard}>
+            <MaterialCommunityIcons name="cash" size={24} color="#000" />
+            <Text style={styles.statNumber}>${stats.totalRevenue}</Text>
+            <Text style={styles.statLabel}>Total Revenue</Text>
+          </View>
         </View>
       </View>
 
@@ -140,43 +162,42 @@ const styles = StyleSheet.create({
     marginTop: 40,
     marginBottom: 20,
   },
+  statsSection: {
+    marginBottom: 25,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    color: '#000',
+  },
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 20,
   },
   statCard: {
-    backgroundColor: 'white',
+    backgroundColor: '#fff',
     padding: 20,
     borderRadius: 15,
     width: '48%',
     alignItems: 'center',
-    // Shadow for iOS
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    // Shadow for Android
     elevation: 3,
+    borderWidth: 1,
+    borderColor: '#ddd',
   },
   statNumber: {
     fontSize: 24,
     fontWeight: 'bold',
     marginVertical: 5,
-    textAlign: 'center',
+    color: '#000',
   },
   statLabel: {
     fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
+    color: '#000',
+    opacity: 0.7,
   },
   dishesSection: {
     marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 15,
   },
   dishCard: {
     backgroundColor: 'white',
@@ -186,13 +207,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    // Shadow for iOS
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    // Shadow for Android
     elevation: 2,
+    borderWidth: 1,
+    borderColor: '#ddd',
   },
   dishInfo: {
     flex: 1,
@@ -201,7 +218,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  dishOrders: {
+  dishPrice: {
+    fontSize: 14,
+    color: '#007AFF',
+    fontWeight: '500',
+  },
+  dishCategory: {
+    fontSize: 12,
     color: '#666',
   },
   editButton: {
@@ -234,14 +257,5 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     fontSize: 16,
     fontWeight: '600',
-  },
-  dishPrice: {
-    fontSize: 14,
-    color: '#007AFF',
-    fontWeight: '500',
-  },
-  dishCategory: {
-    fontSize: 12,
-    color: '#666',
   },
 });

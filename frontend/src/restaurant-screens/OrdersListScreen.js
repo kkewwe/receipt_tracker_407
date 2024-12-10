@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   StyleSheet, 
   View, 
@@ -8,25 +8,31 @@ import {
   ActivityIndicator 
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 
 const API_URL = 'https://receipt-tracker-407.onrender.com';
 
 export default function OrdersListScreen({ navigation, route }) {
-  const [orders, setOrders] = useState([]);
+  const [orders, setOrders] = useState([]);  // Initialize as empty array instead of undefined
   const [loading, setLoading] = useState(true);
   const { restaurantID } = route.params;
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchOrders();
+    }, [])
+  );
 
   const fetchOrders = async () => {
     try {
+      console.log('Fetching orders for restaurant:', restaurantID); // Debug log
       const response = await fetch(`${API_URL}/api/restaurant/${restaurantID}/orders`);
       const data = await response.json();
-      setOrders(data);
+      console.log('Received orders:', data); // Debug log
+      setOrders(data || []); // Ensure we set an empty array if data is null/undefined
     } catch (error) {
       console.error('Error fetching orders:', error);
+      setOrders([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
@@ -38,18 +44,17 @@ export default function OrdersListScreen({ navigation, route }) {
       onPress={() => navigation.navigate('OrderDetails', { order: item })}
     >
       <View style={styles.orderHeader}>
-        <Text style={styles.orderId}>Order #{item.orderID}</Text>
-        <Text style={styles.orderDate}>
-          {new Date(item.date).toLocaleDateString()}
+        <Text style={styles.orderId}>Order #{item.orderID.slice(-8)}</Text>
+        <Text style={[styles.status, styles[item.status || 'pending']]}>
+          {(item.status || 'PENDING').toUpperCase()}
         </Text>
       </View>
       <View style={styles.orderInfo}>
-        <Text style={styles.itemCount}>{item.items.length} items</Text>
-        <Text style={styles.orderTotal}>${item.total.toFixed(2)}</Text>
-      </View>
-      <View style={styles.statusContainer}>
-        <Text style={[styles.status, styles[item.status]]}>
-          {item.status.toUpperCase()}
+        <Text style={styles.orderDate}>
+          {new Date(item.createdAt).toLocaleTimeString()}
+        </Text>
+        <Text style={styles.orderTotal}>
+          ${item.total?.toFixed(2) || '0.00'}
         </Text>
       </View>
     </TouchableOpacity>
@@ -86,15 +91,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
-    padding: 20,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  listContainer: {
-    paddingBottom: 20,
+    padding: 15,
   },
   orderCard: {
     backgroundColor: 'white',
@@ -110,29 +107,25 @@ const styles = StyleSheet.create({
   orderHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 10,
+    alignItems: 'center',
+    marginBottom: 8,
   },
   orderId: {
     fontSize: 16,
-    fontWeight: 'bold',
-  },
-  orderDate: {
-    color: '#666',
+    fontWeight: '600',
   },
   orderInfo: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 10,
+    alignItems: 'center',
   },
-  itemCount: {
+  orderDate: {
     color: '#666',
+    fontSize: 14,
   },
   orderTotal: {
     fontSize: 16,
     fontWeight: '600',
-  },
-  statusContainer: {
-    alignItems: 'flex-start',
   },
   status: {
     paddingVertical: 4,
@@ -156,15 +149,5 @@ const styles = StyleSheet.create({
   cancelled: {
     backgroundColor: '#f8d7da',
     color: '#721c24',
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: '#666',
   },
 });
