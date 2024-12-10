@@ -234,9 +234,7 @@ app.post('/api/restaurant/create-order', async (req, res) => {
 
     // Create new order
     const order = new Order({
-      orderID: `ORDER-${Date.now()}-${Math.random()
-        .toString(36)
-        .substr(2, 9)}`,
+      orderID: `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       restaurantID,
       dishes: orderDishes,
       subtotal,
@@ -246,6 +244,12 @@ app.post('/api/restaurant/create-order', async (req, res) => {
 
     await order.save();
     console.log('Order saved:', order);
+
+    // Update restaurant stats - Add these lines
+    restaurant.stats.monthlyOrders += 1;
+    restaurant.stats.monthlyRevenue += subtotal;
+    restaurant.totalOrders += 1;
+    await restaurant.save();
 
     // Generate QR code with restaurant name
     const qrData = JSON.stringify({
@@ -259,11 +263,6 @@ app.post('/api/restaurant/create-order', async (req, res) => {
 
     const qrCode = await QRCode.toDataURL(qrData);
 
-    restaurant.monthlyOrders += 1;
-    restaurant.monthlyRevenue += subtotal;
-
-    await restaurant.save();
-
     res.status(201).json({
       message: 'Order created successfully',
       order,
@@ -274,6 +273,92 @@ app.post('/api/restaurant/create-order', async (req, res) => {
     res.status(500).json({
       message: 'Failed to create order',
       error: error.message,
+    });
+  }
+});
+
+// Get all orders for a specific restaurant
+app.get('/api/restaurant/:restaurantID/orders', async (req, res) => {
+  try {
+    const { restaurantID } = req.params;
+    const orders = await Order.find({ restaurantID })
+      .sort({ createdAt: -1 }); // Most recent orders first
+
+    res.json(orders);
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    res.status(500).json({
+      message: 'Failed to fetch orders',
+      error: error.message
+    });
+  }
+});
+
+// Get specific order details
+app.get('/api/restaurant/order/:orderID', async (req, res) => {
+  try {
+    const order = await Order.findOne({ orderID: req.params.orderID });
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+    res.json(order);
+  } catch (error) {
+    console.error('Error fetching order:', error);
+    res.status(500).json({
+      message: 'Failed to fetch order details',
+      error: error.message
+    });
+  }
+});
+
+// Update order status
+app.patch('/api/restaurant/order/:orderID/status', async (req, res) => {
+  try {
+    const { orderID } = req.params;
+    const { status } = req.body;
+
+    if (!['pending', 'confirmed', 'completed', 'cancelled'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid status' });
+    }
+
+    const order = await Order.findOne({ orderID });
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    order.status = status;
+    await order.save();
+
+    res.json({ message: 'Order status updated', order });
+  } catch (error) {
+    console.error('Error updating order status:', error);
+    res.status(500).json({
+      message: 'Failed to update order status',
+      error: error.message
+    });
+  }
+});
+
+// Get restaurant statistics
+app.get('/api/restaurant/:restaurantID/stats', async (req, res) => {
+  try {
+    const { restaurantID } = req.params;
+    const restaurant = await Restaurant.findOne({ restaurantID });
+    
+    if (!restaurant) {
+      return res.status(404).json({ message: 'Restaurant not found' });
+    }
+
+    // Access the nested stats object
+    res.json({
+      monthlyOrders: restaurant.stats.monthlyOrders || 0,
+      monthlyRevenue: restaurant.stats.monthlyRevenue || 0
+    });
+  } catch (error) {
+    console.error('Error fetching restaurant statistics:', error);
+    res.status(500).json({
+      message: 'Failed to fetch statistics',
+      error: error.message
     });
   }
 });

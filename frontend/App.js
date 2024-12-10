@@ -17,6 +17,7 @@ import CreateOrderScreen from './src/restaurant-screens/CreateOrderScreen';
 import AddDish from './src/restaurant-screens/AddDish';
 import EditDish from './src/restaurant-screens/EditDish';
 import OrderDetails from './src/restaurant-screens/OrderDetails';
+import OrdersListScreen from './src/restaurant-screens/OrdersListScreen';
 
 // Common Screens
 import HomeScreen from './src/screens/HomeScreen';
@@ -76,16 +77,8 @@ function RestaurantTabNavigator({ route }) {
         tabBarInactiveTintColor: 'gray',
       })}
     >
-      <Tab.Screen 
-        name="Dashboard" 
-        component={RestaurantDashboard}
-        initialParams={{ restaurantID: route?.params?.restaurantID }}
-      />
-      <Tab.Screen 
-        name="Create Order" 
-        component={CreateOrderScreen}
-        initialParams={{ restaurantID: route?.params?.restaurantID }}
-      />
+      <Tab.Screen name="Dashboard" component={RestaurantDashboard}initialParams={{ restaurantID: route?.params?.restaurantID }} />
+      <Tab.Screen name="Create Order" component={CreateOrderScreen} initialParams={{ restaurantID: route?.params?.restaurantID }} />
       <Tab.Screen name="Settings" component={SettingsScreen} />
     </Tab.Navigator>
   );
@@ -116,9 +109,18 @@ export default function App() {
         <Stack.Screen name="MainApp" component={MainApp} />
         
         {/* Restaurant Screens */}
-        <Stack.Screen name="AddDish" component={AddDish} />
-        <Stack.Screen name="EditDish" component={EditDish} />
-        <Stack.Screen name="OrderDetails" component={OrderDetails} />
+          <Stack.Screen name="AddDish" component={AddDish} />
+          <Stack.Screen name="EditDish" component={EditDish} />
+          <Stack.Screen name="OrderDetails" component={OrderDetails} />
+          <Stack.Screen 
+            name="OrdersList" 
+            component={OrdersListScreen}
+            options={{
+              headerShown: true,
+              headerTitle: 'Orders',
+              headerBackTitle: 'Back'
+            }}
+          />
         
         {/* Client Screens */}
         <Stack.Screen 
