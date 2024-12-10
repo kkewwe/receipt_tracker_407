@@ -18,7 +18,21 @@ export default function ScanHistoryScreen({ navigation }) {
 
   useEffect(() => {
     loadScans();
-  }, []);
+    
+    navigation.setOptions({
+      headerLeft: () => (
+        <TouchableOpacity 
+          onPress={() => navigation.navigate('MainApp', { 
+            isUserSide: true,
+            screen: 'Dashboard' 
+          })}
+          style={{ marginLeft: 10 }}
+        >
+          <Text style={{ color: '#007AFF' }}>Back</Text>
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]);
 
   const loadScans = async () => {
     try {

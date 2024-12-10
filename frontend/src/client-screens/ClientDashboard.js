@@ -65,17 +65,30 @@ export default function ClientDashboard({ navigation }) {
     <ScrollView style={styles.container}>
       <Text style={styles.welcomeText}>Welcome back!</Text>
 
-      {/* Stats Cards */}
-      <View style={styles.statsContainer}>
-        <View style={styles.statCard}>
-          <MaterialCommunityIcons name="qrcode-scan" size={24} color="#fff" />
-          <Text style={styles.statNumber}>{stats.totalScans}</Text>
-          <Text style={styles.statLabel}>Total Orders</Text>
+      {/* Monthly Spending */}
+      <View style={styles.monthlySection}>
+        <Text style={styles.sectionTitle}>This Month</Text>
+        <View style={styles.monthlyCard}>
+          <MaterialCommunityIcons name="calendar-month" size={24} color="#000" />
+          <Text style={styles.monthlyAmount}>${stats.monthlySpent}</Text>
+          <Text style={styles.monthlyLabel}>Spent this month</Text>
         </View>
-        <View style={styles.statCard}>
-          <MaterialCommunityIcons name="cash" size={24} color="#fff" />
-          <Text style={styles.statNumber}>${stats.totalSpent}</Text>
-          <Text style={styles.statLabel}>Total Spent</Text>
+      </View>
+
+      {/* Overall Stats */}
+      <View style={styles.overallStats}>
+        <Text style={styles.sectionTitle}>Overall Stats</Text>
+        <View style={styles.statsContainer}>
+          <View style={styles.statCard}>
+            <MaterialCommunityIcons name="qrcode-scan" size={24} color="#000" />
+            <Text style={styles.statNumber}>{stats.totalScans}</Text>
+            <Text style={styles.statLabel}>Total Orders</Text>
+          </View>
+          <View style={styles.statCard}>
+            <MaterialCommunityIcons name="cash" size={24} color="#000" />
+            <Text style={styles.statNumber}>${stats.totalSpent}</Text>
+            <Text style={styles.statLabel}>Total Spent</Text>
+          </View>
         </View>
       </View>
 
@@ -95,16 +108,6 @@ export default function ClientDashboard({ navigation }) {
           <MaterialCommunityIcons name="history" size={24} color="white" />
           <Text style={styles.actionButtonText}>View History</Text>
         </TouchableOpacity>
-      </View>
-
-      {/* Monthly Spending */}
-      <View style={styles.monthlySection}>
-        <Text style={styles.sectionTitle}>This Month</Text>
-        <View style={styles.monthlyCard}>
-          <MaterialCommunityIcons name="calendar-month" size={24} color="#fff" />
-          <Text style={styles.monthlyAmount}>${stats.monthlySpent}</Text>
-          <Text style={styles.monthlyLabel}>Spent this month</Text>
-        </View>
       </View>
 
       {/* Recent Activity */}
@@ -134,49 +137,55 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: '#000',
   },
+  monthlySection: {
+    marginBottom: 25,
+  },
+  overallStats: {
+    marginBottom: 25,
+  },
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 20,
   },
   statCard: {
-    backgroundColor: '#000',
+    backgroundColor: '#fff',
     padding: 20,
     borderRadius: 15,
     width: '48%',
     alignItems: 'center',
     elevation: 5,
+    borderWidth: 1,
+    borderColor: '#ddd',
   },
   statNumber: {
     fontSize: 26,
     fontWeight: 'bold',
     marginVertical: 5,
-    color: '#fff',
+    color: '#000',
   },
   statLabel: {
     fontSize: 14,
-    color: '#fff',
+    color: '#000',
     opacity: 0.7,
   },
-  monthlySection: {
-    marginBottom: 25,
-  },
   monthlyCard: {
-    backgroundColor: '#000',
+    backgroundColor: '#fff',
     padding: 25,
     borderRadius: 15,
     alignItems: 'center',
     elevation: 5,
+    borderWidth: 1,
+    borderColor: '#ddd',
   },
   monthlyAmount: {
     fontSize: 28,
     fontWeight: 'bold',
     marginVertical: 10,
-    color: '#fff',
+    color: '#000',
   },
   monthlyLabel: {
     fontSize: 14,
-    color: '#fff',
+    color: '#000',
     opacity: 0.7,
   },
   sectionTitle: {
