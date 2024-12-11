@@ -113,27 +113,6 @@ export default function SettingsScreen({ navigation }) {
 
         <View style={styles.divider} />
 
-        {/* Delete Profile Section */}
-        <Text style={styles.sectionTitle}>Delete Profile</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter Password to Confirm"
-          value={deletePassword}
-          onChangeText={setDeletePassword}
-          secureTextEntry
-        />
-        <TouchableOpacity
-          style={[styles.button, styles.deleteButton, loading && styles.buttonDisabled]}
-          onPress={handleDeleteProfile}
-          disabled={loading}
-        >
-          <Text style={styles.buttonText}>
-            {loading ? 'Deleting...' : 'Delete Profile'}
-          </Text>
-        </TouchableOpacity>
-
-        <View style={styles.divider} />
-
         {/* Log Out Button */}
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Text style={styles.logoutText}>Log Out</Text>
@@ -181,9 +160,6 @@ const styles = StyleSheet.create({
     maxWidth: 300,
     alignItems: 'center',
     marginBottom: 10,
-  },
-  deleteButton: {
-    backgroundColor: '#ff4444',
   },
   buttonDisabled: {
     backgroundColor: '#666',
