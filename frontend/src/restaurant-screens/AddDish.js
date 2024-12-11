@@ -150,6 +150,10 @@ const styles = StyleSheet.create({
     backButtonText: {
       fontSize: 16,
       color: '#000',
+      position: 'absolute',
+      top: 50,
+      left: 20,
+      padding: 10,
     },
     title: {
       fontSize: 28,
