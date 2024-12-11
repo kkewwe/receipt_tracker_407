@@ -536,39 +536,6 @@ app.post('/api/auth/edit-password', async (req, res) => {
   }
 });
 
-
-// delete profile
-app.post('/api/auth/delete-profile', async (req, res) => {
-  try {
-    const { userId, password } = req.body;
-
-    if (!userId || !password) {
-      return res.status(400).json({ message: 'Missing required fields' });
-    }
-
-    // Determine the user type (you may need to send `userType` from the frontend)
-    const user = await Client.findById(userId) || await Restaurant.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    // Verify the password
-    const isValidPassword = await bcrypt.compare(password, user.password);
-    if (!isValidPassword) {
-      return res.status(401).json({ message: 'Incorrect password' });
-    }
-
-    // Delete the user
-    await user.remove();
-
-    res.json({ message: 'Profile deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting profile:', error);
-    res.status(500).json({ message: 'Failed to delete profile', error: error.message });
-  }
-});
-
-
 // Start server
 const port = process.env.PORT || 5000;
 app.listen(port, () => {
