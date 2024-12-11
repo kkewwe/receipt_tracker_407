@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   logoutButton: {
-    backgroundColor: '#008000',
+    backgroundColor: '#FF0000',
     padding: 15,
     borderRadius: 5,
     width: '100%',
