@@ -57,37 +57,6 @@ export default function SettingsScreen({ navigation }) {
     }
   };
 
-  const handleDeleteProfile = async () => {
-    if (!deletePassword) {
-      Alert.alert('Error', 'Please enter your password to confirm');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const userId = await AsyncStorage.getItem('userId');
-      const response = await fetch(`${API_URL}/api/auth/delete-profile`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: userId, password: deletePassword }),
-      });
-
-      if (response.ok) {
-        Alert.alert('Success', 'Profile deleted successfully', [
-          { text: 'OK', onPress: () => navigation.reset({ index: 0, routes: [{ name: 'Home' }] }) },
-        ]);
-      } else {
-        const data = await response.json();
-        Alert.alert('Error', data.message || 'Failed to delete profile');
-      }
-    } catch (error) {
-      console.error('Delete Profile Error:', error);
-      Alert.alert('Error', 'Network error. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleLogout = () => {
     Alert.alert('Log Out', 'Are you sure you want to log out?', [
       {
