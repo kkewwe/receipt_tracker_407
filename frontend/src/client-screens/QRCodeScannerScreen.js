@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, Button, Alert, ActivityIndicator } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 
 const API_URL = 'https://receipt-tracker-407.onrender.com';
 
+// Keep the isProcessing flag outside the component to prevent multiple submissions
 let isProcessing = false;
 
 export default function QRCodeScannerScreen({ navigation }) {
@@ -12,9 +14,20 @@ export default function QRCodeScannerScreen({ navigation }) {
   const [scanned, setScanned] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleBarCodeScanned = async ({ data }) => {
-    console.log('Scan attempt with data:', data);
+  // Reset scanned state when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      setScanned(false);
+      setLoading(false);
+      isProcessing = false;  // Reset the processing flag when screen comes into focus
+      return () => {
+        setScanned(false);
+        setLoading(false);
+      };
+    }, [])
+  );
 
+  const handleBarCodeScanned = async ({ data }) => {
     if (isProcessing || scanned) {
       console.log('Processing or already scanned, ignoring...');
       return;
@@ -22,10 +35,9 @@ export default function QRCodeScannerScreen({ navigation }) {
 
     isProcessing = true;
     setScanned(true);
+    setLoading(true);
 
     try {
-      setLoading(true);
-
       const orderData = JSON.parse(data);
       const userId = await AsyncStorage.getItem('userId');
 
@@ -53,12 +65,15 @@ export default function QRCodeScannerScreen({ navigation }) {
         throw new Error('Failed to save scan');
       }
     } catch (error) {
-      Alert.alert('Error', 'Invalid QR code or failed to save scan');
-      // Remove these resets so scanning stays disabled even after an error
-      // setScanned(false);
-      // isProcessing = false;
+      Alert.alert('Error', 'Invalid QR code or failed to save scan', [
+        { text: 'OK', onPress: () => {
+          setScanned(false);
+          isProcessing = false;
+        }}
+      ]);
     } finally {
       setLoading(false);
+      // i removed reset isProcessing here :Pr
     }
   };
 
