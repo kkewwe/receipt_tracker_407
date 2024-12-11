@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   statCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#CCFFCC',
     padding: 20,
     borderRadius: 15,
     width: '48%',
