@@ -8,6 +8,7 @@ import {
   KeyboardAvoidingView,
   Alert,
   ScrollView,
+  SafeAreaView,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -72,7 +73,7 @@ export default function SettingsScreen({ navigation }) {
   };
 
   return (
-    <KeyboardAvoidingView>
+    <SafeAreaView style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>Settings</Text>
 
@@ -118,7 +119,7 @@ export default function SettingsScreen({ navigation }) {
           <Text style={styles.logoutText}>Log Out</Text>
         </TouchableOpacity>
       </ScrollView>
-    </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
@@ -138,9 +139,9 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    alignSelf: 'flex-start',
     marginTop: 20,
     marginBottom: 10,
+    alignItems: 'center',
   },
   input: {
     width: '100%',
